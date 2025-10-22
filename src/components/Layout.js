@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import FloatingButton from './FloatingButton';
 import '../styles/layout.css';
 
 export default function Layout({ children }) {
@@ -11,6 +12,7 @@ export default function Layout({ children }) {
         <Sidebar />
         <main className="app-main">{children}</main>
       </div>
+      <FloatingButton />
     </div>
   );
 }
