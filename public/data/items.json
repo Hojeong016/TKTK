@@ -9,7 +9,7 @@
       "birthday": "1995-03-12"
     },
     "discord": {
-      "right": "admin",
+      "right": "master",
       "join": "2021-06-15"
     },
     "game": {
@@ -34,7 +34,7 @@
       "birthday": "1998-11-05"
     },
     "discord": {
-      "right": "moderator",
+      "right": "master",
       "join": "2022-01-10"
     },
     "game": {
@@ -59,7 +59,7 @@
       "birthday": "2000-07-21"
     },
     "discord": {
-      "right": "member",
+      "right": "streamer",
       "join": "2024-04-02"
     },
     "game": {
@@ -84,7 +84,7 @@
       "birthday": "1992-12-30"
     },
     "discord": {
-      "right": "moderator",
+      "right": "streamer",
       "join": "2020-09-07"
     },
     "game": {
@@ -109,7 +109,7 @@
       "birthday": "1990-01-18"
     },
     "discord": {
-      "right": "admin",
+      "right": "3tier",
       "join": "2019-02-20"
     },
     "game": {
@@ -134,7 +134,7 @@
       "birthday": "1996-08-09"
     },
     "discord": {
-      "right": "member",
+      "right": "3tier",
       "join": "2023-12-01"
     },
     "game": {

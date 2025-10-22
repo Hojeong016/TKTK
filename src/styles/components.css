@@ -131,7 +131,7 @@
   align-items: flex-start;
   background: #ffffff;
   border-radius: 12px;
-  padding: 14px;
+  padding: 20px;
   width: 100%;
   max-width: 520px;
   box-sizing: border-box;
@@ -194,14 +194,49 @@
 /* badges */
 .badge { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; text-transform:capitalize; }
 .badge-right { margin-left: 8px; }
-.badge-member { background:#f3f4f6; color:#374151; }
-.badge-moderator, .badge-mod { background:#fff7ed; color:#92400e; }
-.badge-admin { background:#ffeded; color:#991b1b; }
+.badge-master { background:#fef3c7; color:#92400e; }
+.badge-streamer { background:#ddd6fe; color:#5b21b6; }
+.badge-3tier { background:#d1fae5; color:#065f46; }
 
 .member-birthday { font-size:13px; color:#6b7280; }
 
 /* description */
-.member-desc { color:#374151; font-size:13px; line-height:1.4; color:#374151; }
+.member-desc { color:#374151; font-size:13px; line-height:1.4; color:#374151; margin-bottom: 16px; }
+
+/* member info grid */
+.member-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+}
+
+.info-content {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex: 1;
+}
+
+.info-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 60px;
+}
+
+.info-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
 
 /* meta row: chips left, streams right */
 .member-meta-row {
@@ -225,7 +260,7 @@
 
 /* responsive */
 @media (max-width:639px) {
-  .member-card { padding:12px; max-width:480px; gap:12px; }
+  .member-card { padding:20px; max-width:480px; gap:12px; }
   .member-avatar { width:48px; height:48px; font-size:14px; }
   .tier-icon { width:22px; height:22px; font-size:11px; right:-4px; top:-4px; }
   .member-meta-row { flex-direction: column; align-items: flex-start; gap:8px; }
@@ -260,6 +295,9 @@
 .badge-member { background:#f3f4f6; color:#374151; }
 .badge-moderator, .badge-mod { background:#fff7ed; color:#92400e; }
 .badge-admin { background:#ffeded; color:#991b1b; }
+.badge-master { background:#fef3c7; color:#92400e; }
+.badge-streamer { background:#ddd6fe; color:#5b21b6; }
+.badge-3tier { background:#d1fae5; color:#065f46; }
 
 /* Avatar + tier overlay */
 .member-avatar-wrap { position: relative; flex: 0 0 auto; }
@@ -476,4 +514,74 @@
 .member-desc {
   display: block;
   width: 100%;
+}
+
+/* Tag filter styles */
+.tag-filter {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: 12px;
+  flex-wrap: wrap;
+}
+.tag-btn {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 0;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+}
+.tag-btn.active {
+  background: linear-gradient(90deg,#2563eb,#7c3aed);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.08);
+}
+.tag-clear {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  cursor: pointer;
+}
+
+/* responsive: tag row stacks under view controls on small screens */
+@media (max-width: 639px) {
+  .list-controls { display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+  .tag-filter { margin-left: 0; }
+}
+
+/* spacing between filters and card grid */
+.list-controls {
+  margin-bottom: 32px; /* increased gap below filters */
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ensure card grid has consistent gap and top spacing */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px; /* increased from 12px */
+  justify-items: center; /* center items on mobile */
+  margin-top: 12px; /* small additional spacing */
+}
+
+/* larger screens: multi-column grid */
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px; /* increased */
+  }
+}
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px; /* increased */
+    justify-items: stretch;
+  }
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { getTierIcon } from '../constants/tiers';
+import { getRightLabel } from '../constants/rights';
 
 /**
  * member shape:
@@ -19,10 +20,25 @@ export default function MemberCard({ member, onSelect }) {
   const displayName = member.info?.koreaname || member.name || gamename;
   const discordName = member.info?.discordname || '—';
   const tier = member.game?.tier || 'free';
-  const right = (member.discord?.right || 'member').toLowerCase();
+  const rightValue = member.discord?.right || 'member';
+  const rightLabel = getRightLabel(rightValue) || rightValue;
+  const right = String(rightValue).toLowerCase();
   const joinRaw = member.discord?.join;
   const joined = joinRaw ? new Date(joinRaw) : null;
-  const joinedText = joined ? `${joined.getFullYear()}/${String(joined.getMonth()+1).padStart(2,'0')}/${String(joined.getDate()).padStart(2,'0')}` : '—';
+  const joinedText = joined ? `${joined.getFullYear()}년 ${String(joined.getMonth()+1).padStart(2,'0')}월 ${String(joined.getDate()).padStart(2,'0')}일` : '—';
+
+  // Format birthday
+  const birthdayRaw = member.info?.birthday;
+  const formatBirthday = (bd) => {
+    if (!bd) return null;
+    const match = bd.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      return `${match[1]}년 ${match[2]}월 ${match[3]}일`;
+    }
+    return bd;
+  };
+  const birthdayText = formatBirthday(birthdayRaw);
+
   const streaming = member.streaming || {};
   const staff = member.memberofthestaff?.name || null;
 
@@ -47,20 +63,34 @@ export default function MemberCard({ member, onSelect }) {
           </div>
 
           <div className="member-actions-block">
-            <div className={`badge badge-right badge-${right}`}>{right}</div>
+            <div className={`badge badge-right badge-${right}`}>{rightLabel}</div>
           </div>
         </div>
 
-        {member.info?.birthday && <div className="member-birthday">Birthday: {member.info.birthday}</div>}
-
         <div className="member-desc">{member.info?.description || member.desc || ''}</div>
 
-        <div className="member-footer">
-          <div className="member-meta">
-            <span className="chip">Joined: {joinedText}</span>
-            {staff && <span className="chip">Staff: {staff}</span>}
+        <div className="member-info-grid">
+          <div className="info-item">
+            <div className="info-content">
+              <span className="info-label">생일</span>
+              <span className="info-value">{birthdayText || '정보 없음'}</span>
+            </div>
           </div>
+          <div className="info-item">
+            <div className="info-content">
+              <span className="info-label">가입일</span>
+              <span className="info-value">{joinedText}</span>
+            </div>
+          </div>
+          <div className="info-item">
+            <div className="info-content">
+              <span className="info-label">담당 일진</span>
+              <span className="info-value">{staff || '정보 없음'}</span>
+            </div>
+          </div>
+        </div>
 
+        <div className="member-footer">
           <div className="member-streams-footer">
             {streaming.soop && (
               <a className="stream-btn" href={streaming.soop} target="_blank" rel="noreferrer">Soop</a>
