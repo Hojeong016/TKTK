@@ -62,6 +62,35 @@
   cursor: pointer;
 }
 
+/* icon button style (small circular icon) */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #374151;
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms, color 120ms;
+}
+
+.btn-icon:hover {
+  background: rgba(37,99,235,0.06);
+  border-color: rgba(37,99,235,0.08);
+  color: #2563eb;
+}
+
+.header-actions .btn-icon {
+  margin-left: 8px;
+}
+
+/* ensure svg inherits color */
+.btn-icon svg { display:block; color: inherit; stroke: currentColor; }
+
 /* Sidebar simple styling */
 .sidebar nav ul {
   list-style: none;

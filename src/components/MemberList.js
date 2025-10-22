@@ -15,10 +15,6 @@ export default function MemberList() {
   return (
     <section>
       <div className="list-controls">
-        <div>
-          <button onClick={() => setView('card')}>Card</button>
-          <button onClick={() => setView('table')}>Table</button>
-        </div>
       </div>
 
       {view === 'card' ? (

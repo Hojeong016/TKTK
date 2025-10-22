@@ -22,7 +22,13 @@ export default function Header() {
 
       <div className="header-actions">
         <input className="header-search" placeholder="Search members..." aria-label="Search members" />
-        <button className="btn" aria-label="Open user menu">User</button>
+        {/* 변경: 텍스트 User -> 검색 돋보기 아이콘 버튼 */}
+        <button className="btn btn-icon" aria-label="Open search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
       </div>
     </header>
   );
