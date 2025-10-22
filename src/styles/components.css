@@ -1,0 +1,450 @@
+/* minimal component styles for Header / Sidebar / buttons */
+
+.header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #eee;
+  gap: 12px;
+}
+
+.btn-hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px;
+}
+
+/* 데스크탑(>=1024px)에서는 숨김 */
+@media (min-width: 1024px) {
+  .btn-hamburger {
+    display: none;
+  }
+}
+
+/* 접근성: 포커스 스타일 유지 */
+.btn-hamburger:focus {
+  outline: 2px solid #2684ff;
+  outline-offset: 2px;
+}
+
+.brand {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-search {
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-width: 160px;
+}
+
+.btn {
+  padding: 6px 10px;
+  background: #0069ff;
+  color: #fff;
+  border-radius: 6px;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Sidebar simple styling */
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sidebar nav li {
+  margin: 8px 0;
+}
+.sidebar nav a {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+  padding: 8px;
+  border-radius: 4px;
+}
+.sidebar nav a.active {
+  background: #f0f4ff;
+}
+
+/* 모바일에서 토글 표시 */
+.sidebar {
+  display: none;
+}
+.sidebar.open {
+  display: block;
+}
+@media (min-width: 1024px) {
+  .sidebar { display: block; }
+  .header-header-actions { display: none; }
+}
+
+/* Modern member card styles */
+
+.member-card {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px;
+  width: 100%;
+  max-width: 520px;
+  box-sizing: border-box;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  cursor: pointer;
+  margin: 0;
+}
+
+.member-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(16,24,40,0.08);
+}
+
+.member-card:focus {
+  outline: 3px solid rgba(38,132,255,0.12);
+  outline-offset: 3px;
+}
+
+/* Avatar */
+.member-avatar-wrap { position: relative; flex: 0 0 auto; }
+.member-avatar { 
+  width:56px; height:56px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:600; background:linear-gradient(135deg,#6A11CB,#2575FC);
+  box-shadow:0 6px 18px rgba(16,24,40,0.06);
+}
+
+/* tier badge */
+.tier-icon {
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  width:28px; height:28px; border-radius:8px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; color:#fff;
+  box-shadow:0 6px 12px rgba(16,24,40,0.08);
+}
+
+/* Body */
+.member-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.member-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.member-title { min-width: 0; }
+.member-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.member-sub { color:#6b7280; font-size:12px; margin-top:4px; }
+
+/* badges */
+.badge { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; text-transform:capitalize; }
+.badge-right { margin-left: 8px; }
+.badge-member { background:#f3f4f6; color:#374151; }
+.badge-moderator, .badge-mod { background:#fff7ed; color:#92400e; }
+.badge-admin { background:#ffeded; color:#991b1b; }
+
+.member-birthday { font-size:13px; color:#6b7280; }
+
+/* description */
+.member-desc { color:#374151; font-size:13px; line-height:1.4; color:#374151; }
+
+/* meta row: chips left, streams right */
+.member-meta-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:6px;
+}
+
+.member-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.chip { font-size:12px; color:#374151; background:#f3f4f6; padding:6px 8px; border-radius:999px; font-weight:600; }
+
+/* streams */
+.member-streams { display:flex; gap:8px; align-items:center; }
+.stream-btn {
+  display:inline-flex; align-items:center; gap:6px; padding:7px 10px; border-radius:8px;
+  background: linear-gradient(90deg,#eef2ff,#fff); color:#2563eb; text-decoration:none; border:1px solid #e6eefc;
+  font-weight:700; font-size:13px;
+}
+
+/* responsive */
+@media (max-width:639px) {
+  .member-card { padding:12px; max-width:480px; gap:12px; }
+  .member-avatar { width:48px; height:48px; font-size:14px; }
+  .tier-icon { width:22px; height:22px; font-size:11px; right:-4px; top:-4px; }
+  .member-meta-row { flex-direction: column; align-items: flex-start; gap:8px; }
+  .member-streams { width:100%; }
+}
+
+/* ensure table visually aligns with card grid when centered */
+.table-container,
+.member-card {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 520px;
+}
+@media (min-width: 640px) {
+  .table-container { max-width: 900px; }
+}
+
+/* 추가: badges, tier icon, streaming buttons, table small tweaks */
+
+/* Badge for discord.right */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+.badge-right { margin-left: 8px; }
+.badge-member { background:#f3f4f6; color:#374151; }
+.badge-moderator, .badge-mod { background:#fff7ed; color:#92400e; }
+.badge-admin { background:#ffeded; color:#991b1b; }
+
+/* Avatar + tier overlay */
+.member-avatar-wrap { position: relative; flex: 0 0 auto; }
+.member-avatar { 
+  width:56px; height:56px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:600; background:linear-gradient(135deg,#6A11CB,#2575FC);
+  box-shadow:0 6px 18px rgba(16,24,40,0.06);
+}
+.tier-icon {
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  width:28px; height:28px; border-radius:8px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; color:#fff;
+  box-shadow:0 6px 12px rgba(16,24,40,0.08);
+}
+/* tier color variants */
+.tier-free { background: #64748b; }
+.tier-bronze { background: #b97a2b; }
+.tier-silver { background: #9ca3af; }
+.tier-gold { background: #f59e0b; }
+.tier-platinum { background: linear-gradient(90deg,#7c3aed,#2563eb); }
+
+/* streams as buttons */
+.stream-btn {
+  display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px;
+  background: linear-gradient(90deg,#eef2ff,#fff); color:#2563eb; text-decoration:none; border:1px solid #e6eefc;
+  font-weight:700; font-size:13px;
+}
+.stream-btn.small { padding:6px 8px; font-size:12px; }
+
+/* member top/sub */
+.member-sub, .td-sub { color:#6b7280; font-size:12px; margin-top:4px; }
+
+/* birthday small line */
+.member-birthday { font-size:13px; color:#6b7280; margin-top:6px; }
+
+/* table small: stream button spacing */
+.td-streams { display:flex; gap:8px; align-items:center; }
+
+/* ensure chips alignment in card */
+.member-meta .chip { background:#f3f4f6; padding:6px 8px; border-radius:999px; font-weight:600; font-size:12px; color:#374151; }
+
+/* minor responsive tweaks */
+@media (max-width:639px) {
+  .member-avatar { width:48px; height:48px; font-size:14px; }
+  .tier-icon { width:22px; height:22px; font-size:11px; right:-4px; top:-4px; }
+  .stream-btn { padding:7px 9px; font-size:13px; }
+  .badge { padding:5px 8px; font-size:12px; }
+}
+
+/* tier icon image styles */
+.tier-icon { position: absolute; right: -6px; top: -6px; display:flex; align-items:center; justify-content:center; }
+.tier-icon-img { width:28px; height:28px; border-radius:6px; object-fit:cover; box-shadow:0 6px 12px rgba(16,24,40,0.08); }
+.tier-icon-img.tiny { width:20px; height:20px; border-radius:5px; margin-right:8px; }
+
+/* table game cell layout */
+.td-game { display:flex; align-items:center; gap:8px; }
+.td-game-text { font-weight:700; color:#111827; }
+
+/* mobile adjustments */
+@media (max-width:639px) {
+  .tier-icon-img { width:22px; height:22px; }
+  .tier-icon-img.tiny { width:16px; height:16px; }
+}
+
+/* 티어 아이콘을 아바타 자리로 사용 */
+.tier-avatar-wrap {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+  background: #fff;
+}
+
+.tier-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 모바일 소형화 */
+@media (max-width:639px) {
+  .tier-avatar-wrap { width:48px; height:48px; border-radius:10px; }
+  .tier-avatar-img { width:100%; height:100%; }
+}
+
+/* 기존 member-avatar 관련 스타일 제거/무시 가능 */
+
+/* header: left info + right actions on same row */
+.member-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* 이름영역과 액션을 좌/우로 분리 */
+  align-items: center;             /* 같은 행 기준으로 수직 가운데 정렬 */
+  gap: 12px;
+}
+
+/* 이름 블록은 줄바꿈 시에도 축소 가능하도록 */
+.member-name-block {
+  min-width: 0;
+  flex: 1 1 auto; /* 남는 공간 모두 사용하고, 축소 가능 */
+}
+
+/* 액션 블록은 항상 오른쪽에 고정 */
+.member-actions-block {
+  margin-left: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+/* 이름 텍스트가 길 경우 생략부호 처리 */
+.member-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 모바일: 좁을 때 액션을 위로 올리고 정렬 유지(필요시) */
+@media (max-width: 639px) {
+  .member-header { align-items: flex-start; }
+  .member-actions-block { margin-left: 0; }
+}
+
+/* footer 추가 스타일링 */
+.member-footer {
+  display: flex;
+  flex-direction: column; /* stack meta then streams */
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+/* Align meta start with the rest of content (remove unexpected left gap) */
+.member-meta {
+  margin: 0;            /* remove extra margin */
+  padding: 0;           /* remove extra padding */
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  align-self: stretch;  /* ensure it spans the same content width as description/title */
+}
+
+/* Ensure chips start at same x position as title/description */
+.member-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  width: 100%;
+  padding-left: 0; /* remove any left padding that caused offset */
+}
+
+/* Make stream buttons behave like mobile on desktop:
+   - equal width buttons
+   - placed on their own row below meta
+*/
+.member-streams-footer {
+  display: flex;
+  gap: 18px;
+  margin-top: 6px;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+/* mobile & desktop: stream buttons are equal-width items (mobile they expand; desktop they'll share available width) */
+.stream-btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:9px 14px;
+  border-radius:10px;
+  background: linear-gradient(90deg,#eef2ff,#fff);
+  color:#2563eb;
+  text-decoration:none;
+  border:1px solid #e6eefc;
+  font-weight:700;
+  font-size:13px;
+
+  /* make buttons flexible so they size like mobile */
+  flex: 1 1 0;
+  min-width: 0; /* prevent overflow from long text */
+}
+
+/* When there is limited width (mobile), buttons stack — keep that behavior */
+@media (max-width:639px) {
+  .member-footer { flex-direction: column; align-items: flex-start; gap:8px; }
+  .member-streams-footer { flex-direction: row; width: 100%; }
+  .stream-btn { flex: 1 1 auto; text-align:center; }
+}
+
+/* Desktop: keep buttons on one line but equal width */
+@media (min-width:1024px) {
+  .member-footer { flex-direction: column; }
+  .member-streams-footer { justify-content: flex-start; flex-direction: row; }
+  .stream-btn { padding:10px 16px; font-size:14px; }
+}
+
+/* ensure birthday/desc occupy full row */
+.member-birthday,
+.member-desc {
+  display: block;
+  width: 100%;
+}

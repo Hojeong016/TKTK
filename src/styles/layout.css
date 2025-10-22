@@ -1,0 +1,96 @@
+/* ...existing code... */
+:root{
+  --sidebar-width: 240px;
+  --gap: 16px;
+  --max-width: 1200px;
+}
+
+/* Global reset minimal */
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--gap);
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.app-body {
+  display: flex;
+  flex-direction: column; /* mobile: stacked */
+}
+
+.sidebar {
+  display: none; /* mobile: hidden, use hamburger */
+}
+
+/* main content */
+.app-main {
+  padding: var(--gap);
+}
+
+/* card grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+
+  /* 변경: 모바일에서 아이템 중앙 정렬 */
+  justify-items: center; /* 각 그리드 아이템을 가로 중앙 정렬 */
+}
+
+/* 각 카드가 화면 가득 늘어나지 않게 최대 너비 지정 (중앙에서 적절한 너비 유지) */
+.member-card {
+  width: 100%;
+  max-width: 480px; /* 필요에 따라 값 조정 */
+  box-sizing: border-box;
+}
+
+/* table basic */
+.member-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.member-table th, .member-table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* larger screens */
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-body {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .sidebar {
+    display: block;
+    width: var(--sidebar-width);
+    border-right: 1px solid #eee;
+    min-height: calc(100vh - 56px);
+    padding: 16px;
+  }
+  .app-main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 24px;
+    flex: 1;
+  }
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+/* ...existing code... */

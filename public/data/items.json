@@ -1,0 +1,152 @@
+[
+  {
+    "id": 1,
+    "name": "AlphaWolf",
+    "info": {
+      "discordname": "디스코드 이름",
+      "gamename": "게임 이름",
+      "koreaname": "실명",
+      "birthday": "1995-03-12"
+    },
+    "discord": {
+      "right": "admin",
+      "join": "2021-06-15"
+    },
+    "game": {
+      "tier": "platinum",
+      "gamename": "게임 이름"
+    },
+    "streaming": {
+      "soop": "https://www.twitch.tv/alphawolf",
+      "chzzk": "https://www.youtube.com/channel/UCalphawolf"
+    },
+    "memberofthestaff": {
+      "name": "Jin Park"
+    }
+  },
+  {
+    "id": 2,
+    "name": "BetaCrow",
+    "info": {
+      "discordname": "Beta#2002",
+      "gamename": "ShadowStrike",
+      "koreaname": "베타",
+      "birthday": "1998-11-05"
+    },
+    "discord": {
+      "right": "moderator",
+      "join": "2022-01-10"
+    },
+    "game": {
+      "tier": "gold",
+      "gamename": "ShadowStrike"
+    },
+    "streaming": {
+      "soop": "https://www.twitch.tv/betacrow",
+      "chzzk": ""
+    },
+    "memberofthestaff": {
+      "name": "Hyejin Lee"
+    }
+  },
+  {
+    "id": 3,
+    "name": "Gamma",
+    "info": {
+      "discordname": "Gamma#3003",
+      "gamename": "ShadowStrike",
+      "koreaname": "감마",
+      "birthday": "2000-07-21"
+    },
+    "discord": {
+      "right": "member",
+      "join": "2024-04-02"
+    },
+    "game": {
+      "tier": "silver",
+      "gamename": "ShadowStrike"
+    },
+    "streaming": {
+      "soop": "",
+      "chzzk": ""
+    },
+    "memberofthestaff": {
+      "name": ""
+    }
+  },
+  {
+    "id": 4,
+    "name": "Delta9",
+    "info": {
+      "discordname": "Delta#4004",
+      "gamename": "ShadowStrike",
+      "koreaname": "델타",
+      "birthday": "1992-12-30"
+    },
+    "discord": {
+      "right": "moderator",
+      "join": "2020-09-07"
+    },
+    "game": {
+      "tier": "gold",
+      "gamename": "ShadowStrike"
+    },
+    "streaming": {
+      "soop": "https://www.twitch.tv/delta9",
+      "chzzk": "https://www.youtube.com/channel/UCdelta9"
+    },
+    "memberofthestaff": {
+      "name": "Minsoo Kim"
+    }
+  },
+  {
+    "id": 5,
+    "name": "EchoStar",
+    "info": {
+      "discordname": "Echo#5005",
+      "gamename": "ShadowStrike",
+      "koreaname": "에코",
+      "birthday": "1990-01-18"
+    },
+    "discord": {
+      "right": "admin",
+      "join": "2019-02-20"
+    },
+    "game": {
+      "tier": "platinum",
+      "gamename": "ShadowStrike"
+    },
+    "streaming": {
+      "soop": "https://www.twitch.tv/echostar",
+      "chzzk": "https://www.youtube.com/channel/UCachecho"
+    },
+    "memberofthestaff": {
+      "name": "Soojin Park"
+    }
+  },
+  {
+    "id": 6,
+    "name": "Zeta",
+    "info": {
+      "discordname": "Zeta#6006",
+      "gamename": "ShadowStrike",
+      "koreaname": "제타",
+      "birthday": "1996-08-09"
+    },
+    "discord": {
+      "right": "member",
+      "join": "2023-12-01"
+    },
+    "game": {
+      "tier": "master",
+      "gamename": "ShadowStrike"
+    },
+    "streaming": {
+      "soop": "",
+      "chzzk": "https://www.youtube.com/channel/UCzeta"
+    },
+    "memberofthestaff": {
+      "name": ""
+    }
+  }
+]
