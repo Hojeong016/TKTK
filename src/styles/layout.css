@@ -74,14 +74,15 @@
 @media (min-width: 1024px) {
   .app-body {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: stretch;
+    flex: 1;
   }
   .sidebar {
     display: block;
     width: var(--sidebar-width);
     border-right: 1px solid #eee;
-    min-height: calc(100vh - 56px);
     padding: 16px;
+    background: #fff;
   }
   .app-main {
     max-width: var(--max-width);
