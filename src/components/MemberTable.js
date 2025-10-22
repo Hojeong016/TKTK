@@ -1,12 +1,14 @@
 import React from 'react';
 import { getTierIcon, TIERS } from '../constants/tiers';
-import { getRightLabel } from '../constants/rights';
+import useStore from '../store/useStore';
 
 /**
  * data: [{...member}]
  * onSelect: function(member)
  */
 export default function MemberTable({ data = [], onSelect }) {
+  const { rightsConfig } = useStore();
+
   if (!data || data.length === 0) return <p>No members</p>;
 
   const fmtJoin = (raw) => {
@@ -47,11 +49,22 @@ export default function MemberTable({ data = [], onSelect }) {
                 <td data-label="Discord">
                   {discordName}
                   <div className="td-sub td-rights">
-                    {rights.map((r, idx) => (
-                      <span key={idx} className="right-tag">
-                        {getRightLabel(r) || r}
-                      </span>
-                    ))}
+                    {rights.map((rightKey, idx) => {
+                      const config = rightsConfig.find(rc => rc.key === rightKey);
+                      if (!config) return null;
+                      return (
+                        <span
+                          key={idx}
+                          className="right-tag"
+                          style={{
+                            color: config.color,
+                            backgroundColor: config.bgColor
+                          }}
+                        >
+                          {config.label}
+                        </span>
+                      );
+                    })}
                   </div>
                 </td>
                 <td data-label="Joined">{fmtJoin(m.discord?.join)}</td>

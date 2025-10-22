@@ -1,6 +1,6 @@
 import React from 'react';
 import { getTierIcon } from '../constants/tiers';
-import { getRightLabel } from '../constants/rights';
+import useStore from '../store/useStore';
 
 /**
  * member shape:
@@ -14,6 +14,8 @@ import { getRightLabel } from '../constants/rights';
  * }
  */
 export default function MemberCard({ member, onSelect }) {
+  const { rightsConfig } = useStore();
+
   if (!member) return null;
 
   const gamename = member.game?.gamename || member.info?.gamename || member.name || 'Unknown';
@@ -62,12 +64,19 @@ export default function MemberCard({ member, onSelect }) {
             <div className="member-name">{gamename}</div>
             <div className="member-sub">{discordName} · {displayName}</div>
             <div className="member-badges">
-              {rights.map((r, index) => {
-                const rightLower = String(r).toLowerCase();
-                const rightLabel = getRightLabel(r) || r;
+              {rights.map((rightKey, index) => {
+                const config = rightsConfig.find(rc => rc.key === rightKey);
+                if (!config) return null;
                 return (
-                  <div key={index} className={`badge badge-right badge-small badge-${rightLower}`}>
-                    {rightLabel}
+                  <div
+                    key={index}
+                    className="badge badge-right badge-small"
+                    style={{
+                      color: config.color,
+                      backgroundColor: config.bgColor
+                    }}
+                  >
+                    {config.label}
                   </div>
                 );
               })}

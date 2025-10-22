@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFetchItems } from '../api/useFetch';
 import { getTierIcon } from '../constants/tiers';
-import { getRightLabel } from '../constants/rights';
+import useStore from '../store/useStore';
 import AddMemberModal from './AddMemberModal';
 
 /**
@@ -10,6 +10,7 @@ import AddMemberModal from './AddMemberModal';
  */
 export default function MemberManagementTable() {
   const { data, isLoading, isError } = useFetchItems();
+  const { rightsConfig } = useStore();
   const [editingId, setEditingId] = React.useState(null);
   const [editData, setEditData] = React.useState({});
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -199,14 +200,14 @@ export default function MemberManagementTable() {
                   <td>
                     {isEditing ? (
                       <div className="rights-checkboxes">
-                        {['master', 'streamer', '3tier'].map(rightOpt => (
-                          <label key={rightOpt} className="checkbox-label">
+                        {rightsConfig.map(rightOpt => (
+                          <label key={rightOpt.key} className="checkbox-label">
                             <input
                               type="checkbox"
-                              checked={(editData.rights || []).includes(rightOpt)}
-                              onChange={() => handleRightToggle(rightOpt)}
+                              checked={(editData.rights || []).includes(rightOpt.key)}
+                              onChange={() => handleRightToggle(rightOpt.key)}
                             />
-                            <span>{getRightLabel(rightOpt)}</span>
+                            <span>{rightOpt.label}</span>
                           </label>
                         ))}
                       </div>
@@ -215,11 +216,22 @@ export default function MemberManagementTable() {
                         {(() => {
                           const rightValue = member.discord?.right || [];
                           const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
-                          return rights.map((r, idx) => (
-                            <span key={idx} className="right-badge-small">
-                              {getRightLabel(r) || r}
-                            </span>
-                          ));
+                          return rights.map((rightKey, idx) => {
+                            const config = rightsConfig.find(rc => rc.key === rightKey);
+                            if (!config) return null;
+                            return (
+                              <span
+                                key={idx}
+                                className="right-badge-small"
+                                style={{
+                                  color: config.color,
+                                  backgroundColor: config.bgColor
+                                }}
+                              >
+                                {config.label}
+                              </span>
+                            );
+                          });
                         })()}
                       </div>
                     )}

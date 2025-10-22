@@ -1,10 +1,12 @@
 import React from 'react';
+import useStore from '../store/useStore';
 
 /**
  * AddMemberModal - 새 멤버 추가 모달
  * 직접 입력 또는 YAML 파일 업로드 지원
  */
 export default function AddMemberModal({ isOpen, onClose }) {
+  const { rightsConfig } = useStore();
   const [inputMode, setInputMode] = React.useState('form'); // 'form' or 'yaml'
   const [formData, setFormData] = React.useState({
     name: '',
@@ -203,14 +205,14 @@ export default function AddMemberModal({ isOpen, onClose }) {
               <div className="form-group form-group-full">
                 <label>권한 (복수 선택 가능)</label>
                 <div className="rights-checkboxes-modal">
-                  {['master', 'streamer', '3tier'].map(rightOpt => (
-                    <label key={rightOpt} className="checkbox-label">
+                  {rightsConfig.map(rightOpt => (
+                    <label key={rightOpt.key} className="checkbox-label">
                       <input
                         type="checkbox"
-                        checked={(formData.rights || []).includes(rightOpt)}
-                        onChange={() => handleRightToggle(rightOpt)}
+                        checked={(formData.rights || []).includes(rightOpt.key)}
+                        onChange={() => handleRightToggle(rightOpt.key)}
                       />
-                      <span>{rightOpt === 'master' ? 'MASTER' : rightOpt === 'streamer' ? 'STREAMER' : '3티어'}</span>
+                      <span>{rightOpt.label}</span>
                     </label>
                   ))}
                 </div>

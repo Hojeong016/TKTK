@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "key": "master",
+    "label": "MASTER",
+    "color": "#dc2626",
+    "bgColor": "#fee2e2",
+    "description": "서버 마스터 권한"
+  },
+  {
+    "id": 2,
+    "key": "streamer",
+    "label": "STREAMER",
+    "color": "#7c3aed",
+    "bgColor": "#ede9fe",
+    "description": "스트리머 권한"
+  },
+  {
+    "id": 3,
+    "key": "3tier",
+    "label": "3티어",
+    "color": "#2563eb",
+    "bgColor": "#dbeafe",
+    "description": "3티어 이상 권한"
+  }
+]
