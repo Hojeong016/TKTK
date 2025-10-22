@@ -189,6 +189,17 @@ export default function AddMemberModal({ isOpen, onClose }) {
                 </select>
               </div>
 
+              <div className="form-group">
+                <label htmlFor="birthday">생일</label>
+                <input
+                  id="birthday"
+                  type="date"
+                  value={formData.birthday}
+                  onChange={(e) => handleInputChange('birthday', e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
               <div className="form-group form-group-full">
                 <label>권한 (복수 선택 가능)</label>
                 <div className="rights-checkboxes-modal">
@@ -203,17 +214,6 @@ export default function AddMemberModal({ isOpen, onClose }) {
                     </label>
                   ))}
                 </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="birthday">생일</label>
-                <input
-                  id="birthday"
-                  type="date"
-                  value={formData.birthday}
-                  onChange={(e) => handleInputChange('birthday', e.target.value)}
-                  className="form-input"
-                />
               </div>
 
               <div className="form-group">

@@ -61,22 +61,19 @@ export default function MemberCard({ member, onSelect }) {
           <div className="member-name-block">
             <div className="member-name">{gamename}</div>
             <div className="member-sub">{discordName} · {displayName}</div>
-          </div>
-
-          <div className="member-actions-block">
-            {rights.map((r, index) => {
-              const rightLower = String(r).toLowerCase();
-              const rightLabel = getRightLabel(r) || r;
-              return (
-                <div key={index} className={`badge badge-right badge-${rightLower}`}>
-                  {rightLabel}
-                </div>
-              );
-            })}
+            <div className="member-badges">
+              {rights.map((r, index) => {
+                const rightLower = String(r).toLowerCase();
+                const rightLabel = getRightLabel(r) || r;
+                return (
+                  <div key={index} className={`badge badge-right badge-small badge-${rightLower}`}>
+                    {rightLabel}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
-
-        <div className="member-desc">{member.info?.description || member.desc || ''}</div>
 
         <div className="member-info-grid">
           <div className="info-item">

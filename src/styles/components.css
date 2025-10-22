@@ -195,9 +195,31 @@
 .badge { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; text-transform:capitalize; }
 .badge-right { margin-left: 4px; }
 .badge-right:first-child { margin-left: 8px; }
+.badge-small {
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
 .badge-master { background:#fef3c7; color:#92400e; }
 .badge-streamer { background:#ddd6fe; color:#5b21b6; }
 .badge-3tier { background:#d1fae5; color:#065f46; }
+
+/* member badges container */
+.member-badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  padding: 5px;
+}
+
+.member-badges .badge-right {
+  margin-left: 0;
+}
+
+.member-badges .badge-right:first-child {
+  margin-left: 0;
+}
 
 .member-birthday { font-size:13px; color:#6b7280; }
 
