@@ -193,7 +193,8 @@
 
 /* badges */
 .badge { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; text-transform:capitalize; }
-.badge-right { margin-left: 8px; }
+.badge-right { margin-left: 4px; }
+.badge-right:first-child { margin-left: 8px; }
 .badge-master { background:#fef3c7; color:#92400e; }
 .badge-streamer { background:#ddd6fe; color:#5b21b6; }
 .badge-3tier { background:#d1fae5; color:#065f46; }
@@ -332,6 +333,19 @@
 
 /* member top/sub */
 .member-sub, .td-sub { color:#6b7280; font-size:12px; margin-top:4px; }
+.td-rights {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.right-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #f3f4f6;
+  color: #6b7280;
+}
 
 /* birthday small line */
 .member-birthday { font-size:13px; color:#6b7280; margin-top:6px; }
@@ -413,9 +427,10 @@
 .member-actions-block {
   margin-left: 12px;
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
   flex: 0 0 auto;
+  flex-wrap: wrap;
 }
 
 /* 이름 텍스트가 길 경우 생략부호 처리 */

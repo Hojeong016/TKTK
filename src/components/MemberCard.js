@@ -20,9 +20,10 @@ export default function MemberCard({ member, onSelect }) {
   const displayName = member.info?.koreaname || member.name || gamename;
   const discordName = member.info?.discordname || '—';
   const tier = member.game?.tier || 'free';
-  const rightValue = member.discord?.right || 'member';
-  const rightLabel = getRightLabel(rightValue) || rightValue;
-  const right = String(rightValue).toLowerCase();
+
+  // right를 배열로 처리
+  const rightValue = member.discord?.right || [];
+  const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
   const joinRaw = member.discord?.join;
   const joined = joinRaw ? new Date(joinRaw) : null;
   const joinedText = joined ? `${joined.getFullYear()}년 ${String(joined.getMonth()+1).padStart(2,'0')}월 ${String(joined.getDate()).padStart(2,'0')}일` : '—';
@@ -63,7 +64,15 @@ export default function MemberCard({ member, onSelect }) {
           </div>
 
           <div className="member-actions-block">
-            <div className={`badge badge-right badge-${right}`}>{rightLabel}</div>
+            {rights.map((r, index) => {
+              const rightLower = String(r).toLowerCase();
+              const rightLabel = getRightLabel(r) || r;
+              return (
+                <div key={index} className={`badge badge-right badge-${rightLower}`}>
+                  {rightLabel}
+                </div>
+              );
+            })}
           </div>
         </div>
 

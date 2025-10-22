@@ -33,8 +33,8 @@ export default function MemberTable({ data = [], onSelect }) {
           {data.map((m) => {
             const gamename = m.game?.gamename || m.info?.gamename || m.name || '—';
             const discordName = m.info?.discordname || '—';
-            const rightValue = m.discord?.right || 'member';
-            const rightLabel = getRightLabel(rightValue) || rightValue;
+            const rightValue = m.discord?.right || [];
+            const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
             return (
               <tr key={m.id} onClick={() => onSelect?.(m)} tabIndex={0}>
                 <td data-label="Member">{m.info?.koreaname || m.name}<div className="td-sub">{gamename}</div></td>
@@ -44,7 +44,16 @@ export default function MemberTable({ data = [], onSelect }) {
                     <span className="td-game-text">{m.game?.tier ?? 'Free'}</span>
                   </div>
                 </td>
-                <td data-label="Discord">{discordName}<div className="td-sub">{rightLabel}</div></td>
+                <td data-label="Discord">
+                  {discordName}
+                  <div className="td-sub td-rights">
+                    {rights.map((r, idx) => (
+                      <span key={idx} className="right-tag">
+                        {getRightLabel(r) || r}
+                      </span>
+                    ))}
+                  </div>
+                </td>
                 <td data-label="Joined">{fmtJoin(m.discord?.join)}</td>
                 <td data-label="Streams">
                   <div className="td-streams">

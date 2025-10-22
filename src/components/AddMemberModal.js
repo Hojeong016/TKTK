@@ -12,7 +12,7 @@ export default function AddMemberModal({ isOpen, onClose }) {
     discordname: '',
     gamename: '',
     tier: '',
-    right: '',
+    rights: [],
     birthday: '',
     soopUrl: '',
     chzzkUrl: ''
@@ -25,6 +25,16 @@ export default function AddMemberModal({ isOpen, onClose }) {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleRightToggle = (rightValue) => {
+    setFormData(prev => {
+      const currentRights = prev.rights || [];
+      const newRights = currentRights.includes(rightValue)
+        ? currentRights.filter(r => r !== rightValue)
+        : [...currentRights, rightValue];
+      return { ...prev, rights: newRights };
+    });
   };
 
   const handleFileUpload = (e) => {
@@ -73,7 +83,7 @@ export default function AddMemberModal({ isOpen, onClose }) {
       discordname: '',
       gamename: '',
       tier: '',
-      right: '',
+      rights: [],
       birthday: '',
       soopUrl: '',
       chzzkUrl: ''
@@ -179,20 +189,20 @@ export default function AddMemberModal({ isOpen, onClose }) {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="right">권한</label>
-                <select
-                  id="right"
-                  value={formData.right}
-                  onChange={(e) => handleInputChange('right', e.target.value)}
-                  className="form-select"
-                >
-                  <option value="">선택</option>
-                  <option value="master">MASTER</option>
-                  <option value="streamer">STREAMER</option>
-                  <option value="3tier">3티어</option>
-                  <option value="member">member</option>
-                </select>
+              <div className="form-group form-group-full">
+                <label>권한 (복수 선택 가능)</label>
+                <div className="rights-checkboxes-modal">
+                  {['master', 'streamer', '3tier'].map(rightOpt => (
+                    <label key={rightOpt} className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={(formData.rights || []).includes(rightOpt)}
+                        onChange={() => handleRightToggle(rightOpt)}
+                      />
+                      <span>{rightOpt === 'master' ? 'MASTER' : rightOpt === 'streamer' ? 'STREAMER' : '3티어'}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div className="form-group">

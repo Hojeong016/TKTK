@@ -16,16 +16,29 @@ export default function MemberManagementTable() {
 
   const handleEdit = (member) => {
     setEditingId(member.id);
+    const rightValue = member.discord?.right || [];
+    const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
+
     setEditData({
       name: member.name || '',
       koreaname: member.info?.koreaname || '',
       discordname: member.info?.discordname || '',
       gamename: member.game?.gamename || member.info?.gamename || '',
       tier: member.game?.tier || '',
-      right: member.discord?.right || '',
+      rights: rights,
       birthday: member.info?.birthday || '',
       soopUrl: member.streaming?.soop || '',
       chzzkUrl: member.streaming?.chzzk || ''
+    });
+  };
+
+  const handleRightToggle = (rightValue) => {
+    setEditData(prev => {
+      const currentRights = prev.rights || [];
+      const newRights = currentRights.includes(rightValue)
+        ? currentRights.filter(r => r !== rightValue)
+        : [...currentRights, rightValue];
+      return { ...prev, rights: newRights };
     });
   };
 
@@ -185,19 +198,30 @@ export default function MemberManagementTable() {
                   {/* 권한 */}
                   <td>
                     {isEditing ? (
-                      <select
-                        value={editData.right}
-                        onChange={(e) => handleInputChange('right', e.target.value)}
-                        className="table-select"
-                      >
-                        <option value="">선택</option>
-                        <option value="master">MASTER</option>
-                        <option value="streamer">STREAMER</option>
-                        <option value="3tier">3티어</option>
-                        <option value="member">member</option>
-                      </select>
+                      <div className="rights-checkboxes">
+                        {['master', 'streamer', '3tier'].map(rightOpt => (
+                          <label key={rightOpt} className="checkbox-label">
+                            <input
+                              type="checkbox"
+                              checked={(editData.rights || []).includes(rightOpt)}
+                              onChange={() => handleRightToggle(rightOpt)}
+                            />
+                            <span>{getRightLabel(rightOpt)}</span>
+                          </label>
+                        ))}
+                      </div>
                     ) : (
-                      getRightLabel(member.discord?.right) || member.discord?.right || '—'
+                      <div className="rights-display">
+                        {(() => {
+                          const rightValue = member.discord?.right || [];
+                          const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
+                          return rights.map((r, idx) => (
+                            <span key={idx} className="right-badge-small">
+                              {getRightLabel(r) || r}
+                            </span>
+                          ));
+                        })()}
+                      </div>
                     )}
                   </td>
 
