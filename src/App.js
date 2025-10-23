@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
+import Tier from './pages/Tier';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import useStore from './store/useStore';
@@ -18,6 +19,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/tier" element={<Tier />} />
       <Route path="/reports" element={<Reports />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/*" element={<Home />} />
