@@ -2,7 +2,6 @@ import React from 'react';
 import Layout from '../components/Layout';
 import TierDistribution from '../components/TierDistribution';
 import ActivityTimeline from '../components/ActivityTimeline';
-import TopPerformers from '../components/TopPerformers';
 import '../styles/reports.css';
 
 export default function Reports() {
@@ -22,13 +21,10 @@ export default function Reports() {
           </div>
         </div>
 
-        {/* 활동 및 성적 섹션 */}
+        {/* 활동 섹션 */}
         <div className="reports-activity-section">
           <div className="activity-container">
             <ActivityTimeline />
-          </div>
-          <div className="performers-container">
-            <TopPerformers />
           </div>
         </div>
       </div>
