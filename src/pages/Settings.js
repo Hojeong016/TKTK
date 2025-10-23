@@ -2,10 +2,11 @@ import React from 'react';
 import Layout from '../components/Layout';
 import MemberManagementTable from '../components/MemberManagementTable';
 import RightsManagement from '../components/RightsManagement';
+import TierManagement from '../components/TierManagement';
 import '../styles/settings.css';
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = React.useState('members'); // 'members' or 'rights'
+  const [activeTab, setActiveTab] = React.useState('members'); // 'members', 'rights', or 'tier'
 
   return (
     <Layout>
@@ -29,12 +30,19 @@ export default function Settings() {
           >
             권한 관리
           </button>
+          <button
+            className={`settings-tab ${activeTab === 'tier' ? 'active' : ''}`}
+            onClick={() => setActiveTab('tier')}
+          >
+            TKTK CLAN TIER
+          </button>
         </div>
 
         {/* Tab Content */}
         <div className="settings-tab-content">
           {activeTab === 'members' && <MemberManagementTable />}
           {activeTab === 'rights' && <RightsManagement />}
+          {activeTab === 'tier' && <TierManagement />}
         </div>
       </div>
     </Layout>
