@@ -9,23 +9,27 @@ export default function MemberList() {
   const setSelectedItem = useStore((s) => s.setSelectedItem);
   const selectedTags = useStore((s) => s.selectedTags);
 
-  // derive tag options from data (tier only)
+  // derive tag options from data (rights/badges only)
   const tags = React.useMemo(() => {
     if (!data || !Array.isArray(data)) return [];
     const set = new Set();
     data.forEach((m) => {
-      if (m.game?.tier) set.add(`tier:${String(m.game.tier)}`);
+      const rightValue = m.discord?.right || [];
+      const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
+      rights.forEach((r) => {
+        if (r) set.add(`right:${String(r)}`);
+      });
     });
     return Array.from(set);
   }, [data]);
 
   const matchTag = React.useCallback((member, tag) => {
     if (!tag) return true;
-    if (tag.startsWith('tier:')) return String(member.game?.tier) === tag.split(':')[1];
-    if (tag.startsWith('right:')) return String(member.discord?.right) === tag.split(':')[1];
-    if (tag === 'stream:soop') return Boolean(member.streaming?.soop);
-    if (tag === 'stream:chzzk') return Boolean(member.streaming?.chzzk);
-    if (tag.startsWith('game:')) return (member.game?.gamename || member.info?.gamename) === tag.split(':')[1];
+    if (tag.startsWith('right:')) {
+      const rightValue = member.discord?.right || [];
+      const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
+      return rights.includes(tag.split(':')[1]);
+    }
     return false;
   }, []);
 
