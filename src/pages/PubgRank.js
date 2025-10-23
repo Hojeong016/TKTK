@@ -12,11 +12,19 @@ const generateMockPlayers = (tier, count = 10) => {
     'SteelWolf', 'MysticWarrior', 'VenomSnake', 'TitanForce', 'CosmicRider'
   ];
 
+  const discordNames = [
+    '치킨러버#1234', '배그왕#5678', '헤드샷마스터#9012', '생존왕#3456', '킬러본능#7890',
+    '전략가#2345', '스나이퍼#6789', '돌격대장#0123', '은신고수#4567', '팀플왕#8901',
+    '배그고인물#1111', '최강전사#2222', '프로게이머#3333', '킬왕#4444', '승률왕#5555',
+    '에임신#6666', '반동제어#7777', '리코일마스터#8888', '치킨딜러#9999', '배그중독#0000'
+  ];
+
   return Array.from({ length: count }, (_, i) => ({
     id: `${tier}-${i}`,
     rank: i + 1,
     prevRank: i + 1,
     name: names[i] || `Player${i + 1}`,
+    discordName: discordNames[i] || `유저${i + 1}#0000`,
     tier: tier,
     wins: Math.floor(Math.random() * 30) + 10,
     kills: Math.floor(Math.random() * 150) + 50,
@@ -109,7 +117,7 @@ export default function PubgRank() {
       <div className="pubg-rank-page">
         <div className="tier-header">
           <h1 className="tier-title">PUBG Rank</h1>
-          <p className="tier-subtitle">티어별 상위 랭킹</p>
+          <p className="tier-subtitle">PUBG 티어별 상위 랭킹</p>
         </div>
 
         <div className="tier-instruction">
@@ -143,7 +151,7 @@ export default function PubgRank() {
                   {getTierIcon(tierList.find(t => t.key === selectedTier)?.label, { className: 'tier-icon-title' })}
                 </span>
               )}
-              {selectedTier === 'all' ? '전체 티어' : tierList.find(t => t.key === selectedTier)?.label} RANK
+              {selectedTier === 'all' ? 'ALL' : tierList.find(t => t.key === selectedTier)?.label} RANK
             </h3>
 
             {players.length > 0 ? (
@@ -176,7 +184,7 @@ export default function PubgRank() {
                         )}
                         {getTierIcon(player.tier, { className: 'performer-tier-icon', title: player.tier })}
                       </div>
-                      <div className="performer-tier">{player.tier}</div>
+                      <div className="performer-tier">{player.discordName}</div>
                     </div>
 
                     <div className="performer-stats">
