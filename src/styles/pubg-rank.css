@@ -1,0 +1,247 @@
+/* PUBG Rank Page Styles */
+
+.pubg-rank-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Tier Tabs */
+.tier-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  margin-top: 16px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow-x: auto;
+  justify-content: center;
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.tier-tab {
+  flex: 0 0 auto;
+  width: 70px;
+  height: 70px;
+  padding: 8px;
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
+}
+
+.tier-tab-all-icon {
+  font-size: 36px;
+}
+
+.tier-icon-tab {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+/* Tooltip on hover */
+.tier-tab::after {
+  content: attr(title);
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  background: #111827;
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.tier-tab::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #111827;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.tier-tab:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tier-tab:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+.tier-tab:hover::before {
+  opacity: 1;
+}
+
+.tier-tab.active {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  border-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Rank Content */
+.rank-content {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+/* Top Performers Title Spacing */
+.top-performers-title {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* Title Tier Icon */
+.title-tier-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 12px;
+  vertical-align: middle;
+}
+
+.tier-icon-title {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+/* Empty State */
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.empty-state p {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Performer Item Animations */
+.performers-list {
+  position: relative;
+}
+
+.performer-item {
+  position: relative;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.performer-item:hover {
+  transform: translateX(8px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+/* Rank Badge Animation */
+.performer-rank-badge {
+  transition: all 0.3s ease;
+}
+
+.performer-item:hover .performer-rank-badge {
+  transform: scale(1.15) rotate(5deg);
+}
+
+/* Stats Animation */
+.performer-stat-value {
+  transition: all 0.3s ease;
+}
+
+.performer-item:hover .performer-stat-value {
+  color: #2563eb;
+  transform: scale(1.1);
+}
+
+/* Rank Change Indicator - Inline */
+.rank-change-inline {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  line-height: 1;
+}
+
+.rank-change-inline.rank-up {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.rank-change-inline.rank-down {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.rank-change-inline.rank-same {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pubg-rank-page {
+    padding: 16px;
+  }
+
+  .tier-tabs {
+    gap: 8px;
+    padding: 6px;
+  }
+
+  .tier-tab {
+    min-width: 80px;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .rank-content {
+    padding: 16px;
+  }
+}

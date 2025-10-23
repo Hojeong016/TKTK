@@ -14,7 +14,7 @@ export const TIERS = {
 export function getTierIcon(tierValue, props = {}) {
   if (!tierValue) return null;
   const key = String(tierValue).trim().toLowerCase().replace(/\s+/g, '');
-  const filename = `${key}.webp`;
+  const filename = `${key}.png`;
   const src = `/assets/tiers/${filename}`;
   // eslint-disable-next-line react/jsx-props-no-spreading
   return <img src={src} alt={`Tier ${tierValue}`} {...props} />;

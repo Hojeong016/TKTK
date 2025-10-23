@@ -11,6 +11,7 @@ export default function Sidebar() {
         <ul>
           <li><NavLink to="/" end>Members</NavLink></li>
           <li><NavLink to="/tier">TKTK Tier</NavLink></li>
+          <li><NavLink to="/pubg-rank">PUBG Rank</NavLink></li>
           <li><NavLink to="/reports">Reports</NavLink></li>
           <li><NavLink to="/settings">Settings</NavLink></li>
         </ul>
