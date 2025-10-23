@@ -182,7 +182,7 @@ export default function PubgRank() {
                              '—'}
                           </span>
                         )}
-                        {getTierIcon(player.tier, { className: 'performer-tier-icon', title: player.tier })}
+                  
                       </div>
                       <div className="performer-tier">{player.discordName}</div>
                     </div>
