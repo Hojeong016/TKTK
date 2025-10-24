@@ -1,28 +1,28 @@
 [
   {
     "id": 1,
-    "name": "AlphaWolf",
+    "name": "XX_져니",
     "info": {
-      "discordname": "디스코드 이름",
-      "gamename": "게임 이름",
+      "discordname": "XX_져니",
+      "gamename": "ZxxxxNxxxx",
       "koreaname": "실명",
-      "birthday": "1995-03-12"
+      "birthday": "11월 9일"
     },
     "discord": {
-      "right": ["master", "streamer","3tier"],
+      "right": ["master","3tier"],
       "join": "2021-06-15"
     },
     "game": {
       "tier": "platinum",
       "level": "상",
-      "gamename": "게임 이름"
+      "gamename": "ZxxxxNxxxx"
     },
     "streaming": {
       "soop": "https://www.twitch.tv/alphawolf",
       "chzzk": "https://www.youtube.com/channel/UCalphawolf"
     },
     "memberofthestaff": {
-      "name": "Jin Park"
+      "name": ""
     }
   },
   {
