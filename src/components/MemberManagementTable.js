@@ -92,9 +92,8 @@ export default function MemberManagementTable() {
           <thead>
             <tr>
               <th>ID</th>
-              <th>이름</th>
+              <th>Discord 닉네임</th>
               <th>한글명</th>
-              <th>디스코드</th>
               <th>게임명</th>
               <th>티어</th>
               <th>권한</th>
@@ -112,17 +111,17 @@ export default function MemberManagementTable() {
                 <tr key={member.id} className={isEditing ? 'editing-row' : ''}>
                   <td>{member.id}</td>
 
-                  {/* 이름 */}
+                  {/* Discord 닉네임 */}
                   <td>
                     {isEditing ? (
                       <input
                         type="text"
-                        value={editData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        value={editData.discordname}
+                        onChange={(e) => handleInputChange('discordname', e.target.value)}
                         className="table-input"
                       />
                     ) : (
-                      member.name
+                      member.info?.discordname || '—'
                     )}
                   </td>
 
@@ -137,20 +136,6 @@ export default function MemberManagementTable() {
                       />
                     ) : (
                       member.info?.koreaname || '—'
-                    )}
-                  </td>
-
-                  {/* 디스코드 */}
-                  <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editData.discordname}
-                        onChange={(e) => handleInputChange('discordname', e.target.value)}
-                        className="table-input"
-                      />
-                    ) : (
-                      member.info?.discordname || '—'
                     )}
                   </td>
 

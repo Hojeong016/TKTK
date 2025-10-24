@@ -3,10 +3,11 @@ import Layout from '../components/Layout';
 import MemberManagementTable from '../components/MemberManagementTable';
 import RightsManagement from '../components/RightsManagement';
 import TierManagement from '../components/TierManagement';
+import BlacklistManagement from '../components/BlacklistManagement';
 import '../styles/settings.css';
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = React.useState('members'); // 'members', 'rights', or 'tier'
+  const [activeTab, setActiveTab] = React.useState('members'); // 'members', 'rights', 'tier', or 'blacklist'
 
   return (
     <Layout>
@@ -36,6 +37,12 @@ export default function Settings() {
           >
             TKTK CLAN TIER
           </button>
+          <button
+            className={`settings-tab ${activeTab === 'blacklist' ? 'active' : ''}`}
+            onClick={() => setActiveTab('blacklist')}
+          >
+            블랙리스트 관리
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -43,6 +50,7 @@ export default function Settings() {
           {activeTab === 'members' && <MemberManagementTable />}
           {activeTab === 'rights' && <RightsManagement />}
           {activeTab === 'tier' && <TierManagement />}
+          {activeTab === 'blacklist' && <BlacklistManagement />}
         </div>
       </div>
     </Layout>
