@@ -1,14 +1,107 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import memberService from './memberService';
 
-// 로컬 public/data/items.json을 읽어오는 훅
+/**
+ * 멤버 목록 조회 훅
+ * @returns {QueryResult} React Query 결과
+ */
 export function useFetchItems() {
   return useQuery({
     queryKey: ['items'],
     queryFn: async () => {
-      const res = await fetch('/data/items.json');
-      if (!res.ok) throw new Error('Failed to load items');
-      return res.json();
+      // 환경에 따라 로컬 또는 서버 API 사용
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      const useLocalData = process.env.REACT_APP_USE_LOCAL_DATA === 'true';
+
+      // 로컬 데이터 사용 모드
+      if (isDevelopment && useLocalData) {
+         return await memberService.getItems();
+      }
+
+      // 서버 API 사용
+      return await memberService.getItems();
     },
     staleTime: 1000 * 60, // 1분
+  });
+}
+
+/**
+ * 특정 멤버 조회 훅
+ * @param {string|number} id - 멤버 ID
+ * @returns {QueryResult} React Query 결과
+ */
+export function useFetchItem(id) {
+  return useQuery({
+    queryKey: ['items', id],
+    queryFn: async () => {
+      return await memberService.getItemById(id);
+    },
+    enabled: !!id, // id가 있을 때만 실행
+    staleTime: 1000 * 60,
+  });
+}
+
+/**
+ * 멤버 생성 훅
+ * @returns {MutationResult} React Query Mutation 결과
+ */
+export function useCreateItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (memberData) => memberService.createItem(memberData),
+    onSuccess: () => {
+      // 생성 성공 시 목록 갱신
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+}
+
+/**
+ * 멤버 업데이트 훅
+ * @returns {MutationResult} React Query Mutation 결과
+ */
+export function useUpdateItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }) => memberService.updateItem(id, data),
+    onSuccess: (_, { id }) => {
+      // 업데이트 성공 시 목록 및 해당 항목 갱신
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['items', id] });
+    },
+  });
+}
+
+/**
+ * 멤버 삭제 훅
+ * @returns {MutationResult} React Query Mutation 결과
+ */
+export function useDeleteItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id) => memberService.deleteItem(id),
+    onSuccess: () => {
+      // 삭제 성공 시 목록 갱신
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+}
+
+/**
+ * 필터링된 멤버 목록 조회 훅
+ * @param {Object} filters - 필터 조건
+ * @returns {QueryResult} React Query 결과
+ */
+export function useFetchFilteredItems(filters) {
+  return useQuery({
+    queryKey: ['items', 'filtered', filters],
+    queryFn: async () => {
+      return await memberService.getFilteredItems(filters);
+    },
+    staleTime: 1000 * 60,
+    enabled: !!filters, // 필터가 있을 때만 실행
   });
 }

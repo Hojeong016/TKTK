@@ -1,5 +1,6 @@
 import React from 'react';
 import useStore from '../store/useStore';
+import { useCreateItem } from '../api/useFetch';
 
 /**
  * AddMemberModal - 새 멤버 추가 모달
@@ -7,6 +8,7 @@ import useStore from '../store/useStore';
  */
 export default function AddMemberModal({ isOpen, onClose }) {
   const { rightsConfig } = useStore();
+  const createMutation = useCreateItem();
   const [inputMode, setInputMode] = React.useState('form'); // 'form' or 'yaml'
   const [formData, setFormData] = React.useState({
     name: '',
@@ -17,7 +19,8 @@ export default function AddMemberModal({ isOpen, onClose }) {
     rights: [],
     birthday: '',
     soopUrl: '',
-    chzzkUrl: ''
+    chzzkUrl: '',
+    tktkTier: ''  // TKTK 티어 추가
   });
   const [yamlContent, setYamlContent] = React.useState('');
   const [fileName, setFileName] = React.useState('');
@@ -66,16 +69,53 @@ export default function AddMemberModal({ isOpen, onClose }) {
     e.preventDefault();
 
     if (inputMode === 'form') {
-      // TODO: API 호출로 폼 데이터 전송
-      console.log('Submitting form data:', formData);
-      alert('멤버 추가 기능은 API 연동 후 구현됩니다.\n데이터: ' + JSON.stringify(formData, null, 2));
-    } else {
-      // TODO: API 호출로 YAML 데이터 전송
-      console.log('Submitting YAML data:', yamlContent);
-      alert('YAML 파일 업로드 기능은 API 연동 후 구현됩니다.');
-    }
+      // 폼 데이터를 서버 DTO 형식으로 변환
+      const newMemberData = {
+        name: formData.name,
+        info: {
+          discordname: formData.discordname,
+          gamename: formData.gamename,
+          koreaname: formData.koreaname,
+          birthday: formData.birthday,
+          description: ''
+        },
+        discord: {
+          right: formData.rights,
+          discordTierId: null, // 서버에서 처리
+          join: new Date().toISOString()
+        },
+        game: {
+          tier: formData.tier,
+          gamename: formData.gamename
+        },
+        streaming: {
+          soop: formData.soopUrl,
+          chzzk: formData.chzzkUrl
+        },
+        memberofthestaff: {
+          name: ''
+        },
+        tktkTier: formData.tktkTier  // TKTK 티어 이름 추가
+      };
 
-    handleClose();
+      // API 호출
+      createMutation.mutate(newMemberData, {
+        onSuccess: () => {
+          alert('멤버가 성공적으로 추가되었습니다.');
+          handleClose();
+        },
+        onError: (error) => {
+          console.error('Failed to create member:', error);
+          alert('멤버 추가에 실패했습니다: ' + error.message);
+        },
+      });
+    } else {
+      // YAML 모드
+      // TODO: YAML 파싱 후 API 호출
+      console.log('Submitting YAML data:', yamlContent);
+      alert('YAML 파일 업로드 기능은 추후 구현 예정입니다.');
+      handleClose();
+    }
   };
 
   const handleClose = () => {
@@ -88,7 +128,8 @@ export default function AddMemberModal({ isOpen, onClose }) {
       rights: [],
       birthday: '',
       soopUrl: '',
-      chzzkUrl: ''
+      chzzkUrl: '',
+      tktkTier: ''
     });
     setYamlContent('');
     setFileName('');
@@ -202,6 +243,22 @@ export default function AddMemberModal({ isOpen, onClose }) {
                 />
               </div>
 
+              <div className="form-group">
+                <label htmlFor="tktkTier">TKTK 티어</label>
+                <select
+                  id="tktkTier"
+                  value={formData.tktkTier}
+                  onChange={(e) => handleInputChange('tktkTier', e.target.value)}
+                  className="form-select"
+                >
+                  <option value="">선택</option>
+                  <option value="1tier">1tier</option>
+                  <option value="2tier">2tier</option>
+                  <option value="3tier">3tier</option>
+                  <option value="4tier">4tier</option>
+                </select>
+              </div>
+
               <div className="form-group form-group-full">
                 <label>권한 (복수 선택 가능)</label>
                 <div className="rights-checkboxes-modal">
@@ -291,11 +348,20 @@ streaming:
           )}
 
           <div className="modal-footer">
-            <button type="button" className="btn-cancel-modal" onClick={handleClose}>
+            <button
+              type="button"
+              className="btn-cancel-modal"
+              onClick={handleClose}
+              disabled={createMutation.isPending}
+            >
               취소
             </button>
-            <button type="submit" className="btn-submit-modal">
-              추가
+            <button
+              type="submit"
+              className="btn-submit-modal"
+              disabled={createMutation.isPending}
+            >
+              {createMutation.isPending ? '추가 중...' : '추가'}
             </button>
           </div>
         </form>

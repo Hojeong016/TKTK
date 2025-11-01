@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFetchItems } from '../api/useFetch';
+import { useFetchItems, useUpdateItem, useDeleteItem } from '../api/useFetch';
 import { getTierIcon } from '../constants/tiers';
 import useStore from '../store/useStore';
 import AddMemberModal from './AddMemberModal';
@@ -14,6 +14,10 @@ export default function MemberManagementTable() {
   const [editingId, setEditingId] = React.useState(null);
   const [editData, setEditData] = React.useState({});
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  // API Mutation 훅
+  const updateMutation = useUpdateItem();
+  const deleteMutation = useDeleteItem();
 
   const handleEdit = (member) => {
     setEditingId(member.id);
@@ -44,10 +48,52 @@ export default function MemberManagementTable() {
   };
 
   const handleSave = (memberId) => {
-    // TODO: API 호출로 데이터 저장
-    console.log('Saving member:', memberId, editData);
-    alert('저장 기능은 API 연동 후 구현됩니다.');
-    setEditingId(null);
+    // 원본 멤버 데이터 찾기
+    const originalMember = data.find(m => m.id === memberId);
+
+    // 수정된 데이터를 서버 DTO 형식으로 변환
+    const updatedMemberData = {
+      name: editData.name,
+      info: {
+        discordname: editData.discordname,
+        gamename: editData.gamename,
+        koreaname: editData.koreaname,
+        birthday: editData.birthday,
+        description: originalMember?.info?.description || ''
+      },
+      discord: {
+        right: editData.rights,
+        discordTierId: originalMember?.discord?.discordTierId || null,
+        join: originalMember?.discord?.join || new Date().toISOString()
+      },
+      game: {
+        tier: editData.tier,
+        gamename: editData.gamename
+      },
+      streaming: {
+        soop: editData.soopUrl,
+        chzzk: editData.chzzkUrl
+      },
+      memberofthestaff: {
+        name: originalMember?.memberofthestaff?.name || ''
+      }
+    };
+
+    // API 호출
+    updateMutation.mutate(
+      { id: memberId, data: updatedMemberData },
+      {
+        onSuccess: () => {
+          alert('멤버 정보가 성공적으로 수정되었습니다.');
+          setEditingId(null);
+          setEditData({});
+        },
+        onError: (error) => {
+          console.error('Failed to update member:', error);
+          alert('멤버 정보 수정에 실패했습니다: ' + error.message);
+        },
+      }
+    );
   };
 
   const handleCancel = () => {
@@ -57,9 +103,15 @@ export default function MemberManagementTable() {
 
   const handleDelete = (member) => {
     if (window.confirm(`정말로 "${member.name}" 멤버를 삭제하시겠습니까?`)) {
-      // TODO: API 호출로 데이터 삭제
-      console.log('Deleting member:', member.id);
-      alert('삭제 기능은 API 연동 후 구현됩니다.');
+      deleteMutation.mutate(member.id, {
+        onSuccess: () => {
+          alert('멤버가 성공적으로 삭제되었습니다.');
+        },
+        onError: (error) => {
+          console.error('Failed to delete member:', error);
+          alert('멤버 삭제에 실패했습니다: ' + error.message);
+        },
+      });
     }
   };
 
@@ -281,12 +333,14 @@ export default function MemberManagementTable() {
                         <button
                           className="btn-save"
                           onClick={() => handleSave(member.id)}
+                          disabled={updateMutation.isPending}
                         >
-                          저장
+                          {updateMutation.isPending ? '저장 중...' : '저장'}
                         </button>
                         <button
                           className="btn-cancel"
                           onClick={handleCancel}
+                          disabled={updateMutation.isPending}
                         >
                           취소
                         </button>
@@ -296,14 +350,16 @@ export default function MemberManagementTable() {
                         <button
                           className="btn-edit"
                           onClick={() => handleEdit(member)}
+                          disabled={deleteMutation.isPending}
                         >
                           수정
                         </button>
                         <button
                           className="btn-delete"
                           onClick={() => handleDelete(member)}
+                          disabled={deleteMutation.isPending}
                         >
-                          삭제
+                          {deleteMutation.isPending ? '삭제 중...' : '삭제'}
                         </button>
                       </div>
                     )}
