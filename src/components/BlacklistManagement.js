@@ -82,10 +82,6 @@ export default function BlacklistManagement() {
     );
   }, [members, searchTerm]);
 
-  if (isLoading) return <div className="management-table-container">Loading...</div>;
-  if (isError) return <div className="management-table-container">Error loading data</div>;
-  if (!members || members.length === 0) return <div className="management-table-container">No members found</div>;
-
   return (
     <div className="management-table-container">
       <div className="table-controls">
@@ -106,7 +102,14 @@ export default function BlacklistManagement() {
         />
       </div>
 
-      <div className="table-wrapper" style={{ marginTop: '20px' }}>
+      {isLoading ? (
+        <div style={{ marginTop: '20px' }}>Loading...</div>
+      ) : isError ? (
+        <div style={{ marginTop: '20px' }}>Error loading data</div>
+      ) : !members || members.length === 0 ? (
+        <div style={{ marginTop: '20px' }}>No members found</div>
+      ) : (
+        <div className="table-wrapper" style={{ marginTop: '20px' }}>
         <table className="management-table">
           <thead>
             <tr>
@@ -210,6 +213,7 @@ export default function BlacklistManagement() {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }

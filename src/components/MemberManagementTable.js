@@ -122,10 +122,6 @@ export default function MemberManagementTable() {
     }));
   };
 
-  if (isLoading) return <div className="management-table-container">Loading...</div>;
-  if (isError) return <div className="management-table-container">Error loading data</div>;
-  if (!data || data.length === 0) return <div className="management-table-container">No members found</div>;
-
   return (
     <div className="management-table-container">
       <div className="table-controls">
@@ -139,7 +135,14 @@ export default function MemberManagementTable() {
         onClose={() => setIsModalOpen(false)}
       />
 
-      <div className="table-wrapper">
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : isError ? (
+        <div>Error loading data</div>
+      ) : !data || data.length === 0 ? (
+        <div>No members found</div>
+      ) : (
+        <div className="table-wrapper">
         <table className="management-table">
           <thead>
             <tr>
@@ -370,6 +373,7 @@ export default function MemberManagementTable() {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }
