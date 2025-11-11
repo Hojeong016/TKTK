@@ -1,72 +1,164 @@
 import React from 'react';
 import { useFetchItems } from '../api/useFetch';
+import {
+  useFetchBlacklist,
+  useWarnMember,
+  useRemoveWarning,
+  useBlacklistMember,
+  useReleaseMember,
+} from '../api/useBlacklist';
+import ConfirmModal from './ConfirmModal';
+import Toast from './Toast';
 
 /**
  * BlacklistManagement - 블랙리스트 및 경고 관리
  */
 export default function BlacklistManagement() {
   const { data: members, isLoading, isError } = useFetchItems();
+  const {
+    data: blacklistEntries,
+    isLoading: blacklistLoading,
+    isError: blacklistError,
+    error: blacklistErrorDetail,
+  } = useFetchBlacklist();
+  const warnMember = useWarnMember();
+  const removeWarning = useRemoveWarning();
+  const blacklistMember = useBlacklistMember();
+  const releaseMember = useReleaseMember();
   const [searchTerm, setSearchTerm] = React.useState('');
-
-  // Mock 데이터 - 블랙리스트 상태 (실제로는 서버에서 가져와야 함)
-  const [blacklistStatus, setBlacklistStatus] = React.useState({
-    1: { isBlacklisted: false, warningCount: 0 },
-    2: { isBlacklisted: false, warningCount: 2 },
-    3: { isBlacklisted: false, warningCount: 1 },
-    4: { isBlacklisted: true, warningCount: 3 },
-    5: { isBlacklisted: false, warningCount: 0 },
-    6: { isBlacklisted: false, warningCount: 1 },
+  const [modalState, setModalState] = React.useState({
+    open: false,
+    mode: null,
+    member: null,
   });
+  const [toast, setToast] = React.useState(null);
+  const toastTimer = React.useRef(null);
 
-  const handleAddToBlacklist = (memberId, memberName) => {
-    if (window.confirm(`"${memberName}"을(를) 블랙리스트에 등록하시겠습니까?`)) {
-      setBlacklistStatus(prev => ({
-        ...prev,
-        [memberId]: { ...prev[memberId], isBlacklisted: true }
-      }));
-      alert('블랙리스트에 등록되었습니다.');
+  const showToast = (type, message) => {
+    if (toastTimer.current) {
+      clearTimeout(toastTimer.current);
     }
+    setToast({ type, message });
+    toastTimer.current = setTimeout(() => setToast(null), 2200);
   };
 
-  const handleRemoveFromBlacklist = (memberId, memberName) => {
-    if (window.confirm(`"${memberName}"을(를) 블랙리스트에서 해제하시겠습니까?`)) {
-      setBlacklistStatus(prev => ({
-        ...prev,
-        [memberId]: { ...prev[memberId], isBlacklisted: false }
-      }));
-      alert('블랙리스트에서 해제되었습니다.');
+  React.useEffect(() => () => {
+    if (toastTimer.current) {
+      clearTimeout(toastTimer.current);
     }
-  };
+  }, []);
 
-  const handleAddWarning = (memberId, memberName) => {
-    if (window.confirm(`"${memberName}"에게 경고를 부여하시겠습니까?`)) {
-      setBlacklistStatus(prev => ({
-        ...prev,
-        [memberId]: {
-          ...prev[memberId],
-          warningCount: (prev[memberId]?.warningCount || 0) + 1
-        }
-      }));
-      alert('경고가 부여되었습니다.');
-    }
-  };
+  const blacklistStatus = React.useMemo(() => {
+    if (!Array.isArray(blacklistEntries)) return {};
+    return blacklistEntries.reduce((acc, entry) => {
+      const memberId =
+        entry.memberId ||
+        entry.member?.id ||
+        entry.memberResponse?.id ||
+        entry.members?.id;
+      if (!memberId) return acc;
 
-  const handleRemoveWarning = (memberId, memberName) => {
-    const currentWarnings = blacklistStatus[memberId]?.warningCount || 0;
-    if (currentWarnings === 0) {
-      alert('경고 내역이 없습니다.');
+      acc[memberId] = {
+        entryId: entry.id,
+        status: entry.status || (entry.isBlacklisted ? 'BLACKLISTED' : 'WARNED'),
+        warningCount: entry.warningCount ?? 0,
+        reason: entry.reason,
+      };
+      return acc;
+    }, {});
+  }, [blacklistEntries]);
+
+
+  const handleAction = (mode, member) => {
+    const config = ACTION_CONFIG[mode];
+    if (!config) return;
+
+    if (config.needsDialog) {
+      setModalState({
+        open: true,
+        mode,
+        member,
+      });
       return;
     }
-    if (window.confirm(`"${memberName}"의 경고를 1회 차감하시겠습니까?`)) {
-      setBlacklistStatus(prev => ({
-        ...prev,
-        [memberId]: {
-          ...prev[memberId],
-          warningCount: Math.max(0, (prev[memberId]?.warningCount || 0) - 1)
+
+    executeAction(mode, member, null);
+  };
+
+  const closeModal = () => {
+    setModalState({
+      open: false,
+      mode: null,
+      member: null,
+    });
+  };
+
+  const executeAction = (mode, member, inputValue) => {
+    if (!member || !mode) return;
+    const memberId = member.id;
+    const config = ACTION_CONFIG[mode] || {};
+    const successMessage = config.successMessage || '처리가 완료되었습니다.';
+    const errorMessage = config.errorMessage || '처리에 실패했습니다.';
+
+    const handleSuccess = () => {
+      showToast('success', successMessage);
+      closeModal();
+    };
+
+    const handleError = (error) => {
+      console.error(errorMessage, error);
+      showToast('error', errorMessage);
+    };
+
+    switch (mode) {
+      case 'warn':
+        warnMember.mutate(
+          { memberId, payload: { reason: inputValue || null } },
+          {
+            onSuccess: handleSuccess,
+            onError: handleError,
+          }
+        );
+        break;
+      case 'removeWarn':
+        removeWarning.mutate(
+          { memberId, payload: {} },
+          {
+            onSuccess: handleSuccess,
+            onError: handleError,
+          }
+        );
+        break;
+      case 'blacklist':
+        if (!inputValue) {
+          showToast('error', '사유를 입력해주세요.');
+          return;
         }
-      }));
-      alert('경고가 차감되었습니다.');
+        blacklistMember.mutate(
+          { memberId, payload: { reason: inputValue } },
+          {
+            onSuccess: handleSuccess,
+            onError: handleError,
+          }
+        );
+        break;
+      case 'release':
+        releaseMember.mutate(
+          { memberId, payload: { memo: inputValue || null } },
+          {
+            onSuccess: handleSuccess,
+            onError: handleError,
+          }
+        );
+        break;
+      default:
+        break;
     }
+  };
+
+  const handleModalConfirm = (inputValue) => {
+    if (!modalState.member || !modalState.mode) return;
+    executeAction(modalState.mode, modalState.member, inputValue);
   };
 
   // 검색 필터링
@@ -102,10 +194,14 @@ export default function BlacklistManagement() {
         />
       </div>
 
-      {isLoading ? (
+      {isLoading || blacklistLoading ? (
         <div style={{ marginTop: '20px' }}>Loading...</div>
-      ) : isError ? (
-        <div style={{ marginTop: '20px' }}>Error loading data</div>
+      ) : isError || blacklistError ? (
+        <div style={{ marginTop: '20px' }}>
+          데이터를 불러오는 중 오류가 발생했습니다.
+          <br />
+          {blacklistErrorDetail?.message}
+        </div>
       ) : !members || members.length === 0 ? (
         <div style={{ marginTop: '20px' }}>No members found</div>
       ) : (
@@ -113,7 +209,7 @@ export default function BlacklistManagement() {
         <table className="management-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th style={{ display: 'none' }}>ID</th>
               <th>Discord 닉네임</th>
               <th>한글명</th>
               <th>게임명</th>
@@ -124,11 +220,13 @@ export default function BlacklistManagement() {
           </thead>
           <tbody>
             {filteredMembers.map((member) => {
-              const status = blacklistStatus[member.id] || { isBlacklisted: false, warningCount: 0 };
+              const statusInfo = blacklistStatus[member.id] || { status: 'NORMAL' };
+              const warningCount = statusInfo.warningCount || 0;
+              const memberStatus = statusInfo.status || 'NORMAL';
 
               return (
                 <tr key={member.id}>
-                  <td>{member.id}</td>
+                  <td style={{ display: 'none' }}>{member.id}</td>
                   <td>{member.info?.discordname || '—'}</td>
                   <td>{member.info?.koreaname || '—'}</td>
                   <td>{member.game?.gamename || member.info?.gamename || '—'}</td>
@@ -141,19 +239,19 @@ export default function BlacklistManagement() {
                         borderRadius: '6px',
                         fontWeight: 700,
                         fontSize: '13px',
-                        background: status.warningCount >= 3 ? '#fecaca' :
-                                   status.warningCount >= 2 ? '#fed7aa' :
-                                   status.warningCount >= 1 ? '#fef3c7' : '#f3f4f6',
-                        color: status.warningCount >= 3 ? '#dc2626' :
-                               status.warningCount >= 2 ? '#ea580c' :
-                               status.warningCount >= 1 ? '#d97706' : '#6b7280'
+                        background: warningCount >= 3 ? '#fecaca' :
+                                   warningCount >= 2 ? '#fed7aa' :
+                                   warningCount >= 1 ? '#fef3c7' : '#f3f4f6',
+                        color: warningCount >= 3 ? '#dc2626' :
+                               warningCount >= 2 ? '#ea580c' :
+                               warningCount >= 1 ? '#d97706' : '#6b7280'
                       }}
                     >
-                      {status.warningCount}회
+                      {warningCount}회
                     </span>
                   </td>
                   <td style={{ textAlign: 'center' }}>
-                    {status.isBlacklisted ? (
+                    {memberStatus === 'BLACKLISTED' ? (
                       <span
                         className="blacklist-badge"
                         style={{
@@ -174,10 +272,10 @@ export default function BlacklistManagement() {
                   </td>
                   <td className="action-cell">
                     <div className="action-buttons">
-                      {status.isBlacklisted ? (
+                      {memberStatus === 'BLACKLISTED' ? (
                         <button
                           className="btn-save"
-                          onClick={() => handleRemoveFromBlacklist(member.id, member.name)}
+                          onClick={() => handleAction('release', member)}
                         >
                           해제
                         </button>
@@ -185,20 +283,20 @@ export default function BlacklistManagement() {
                         <>
                           <button
                             className="btn-delete"
-                            onClick={() => handleAddToBlacklist(member.id, member.name)}
+                            onClick={() => handleAction('blacklist', member)}
                           >
                             등록
                           </button>
                           <button
                             className="btn-edit"
-                            onClick={() => handleAddWarning(member.id, member.name)}
+                            onClick={() => handleAction('warn', member)}
                           >
                             경고
                           </button>
-                          {status.warningCount > 0 && (
+                          {warningCount > 0 && (
                             <button
                               className="btn-cancel"
-                              onClick={() => handleRemoveWarning(member.id, member.name)}
+                              onClick={() => handleAction('removeWarn', member)}
                             >
                               차감
                             </button>
@@ -214,6 +312,76 @@ export default function BlacklistManagement() {
         </table>
       </div>
       )}
+
+      <ActionModal
+        state={modalState}
+        onClose={closeModal}
+        onConfirm={handleModalConfirm}
+      />
+      <Toast open={!!toast} message={toast?.message} type={toast?.type} />
     </div>
+  );
+}
+
+const ACTION_CONFIG = {
+  warn: {
+    needsDialog: false,
+    confirmLabel: '경고 부여',
+    title: () => '경고 부여',
+    description: (name) => `“${name}”에게 경고를 부여하시겠습니까?`,
+    requireInput: false,
+    successMessage: '경고가 부여되었습니다.',
+    errorMessage: '경고 부여에 실패했습니다.',
+  },
+  removeWarn: {
+    needsDialog: false,
+    confirmLabel: '경고 차감',
+    title: () => '경고 차감',
+    description: (name) => `“${name}”의 경고를 1회 차감하시겠습니까?`,
+    requireInput: false,
+    successMessage: '경고가 차감되었습니다.',
+    errorMessage: '경고 차감에 실패했습니다.',
+  },
+  blacklist: {
+    needsDialog: true,
+    confirmLabel: '블랙리스트 등록',
+    title: (name) => '블랙리스트 등록',
+    description: (name) => `“${name}”의 블랙리스트 사유를 입력하세요.`,
+    requireInput: true,
+    inputLabel: '블랙리스트 사유',
+    placeholder: '예: 팀킬 및 비매너 행위',
+    successMessage: '블랙리스트에 등록되었습니다.',
+    errorMessage: '블랙리스트 등록에 실패했습니다.',
+  },
+  release: {
+    needsDialog: false,
+    confirmLabel: '해제',
+    title: () => '블랙리스트 해제',
+    description: (name) => `“${name}”을(를) 블랙리스트에서 해제하시겠습니까?`,
+    requireInput: false,
+    successMessage: '블랙리스트에서 해제되었습니다.',
+    errorMessage: '해제에 실패했습니다.',
+  },
+};
+
+function ActionModal({ state, onClose, onConfirm }) {
+  if (!state.open || !state.mode || !state.member) return null;
+  const config = ACTION_CONFIG[state.mode];
+  const name = state.member.name || state.member.info?.discordname || '해당 멤버';
+
+  return (
+    <ConfirmModal
+      open={state.open}
+      title={config.title(name)}
+      description={config.description(name)}
+      showInput={config.requireInput}
+      inputLabel={config.inputLabel}
+      inputPlaceholder={config.placeholder}
+      confirmLabel={config.confirmLabel}
+      autoClose={config.autoClose}
+      autoCloseDuration={2000}
+      onConfirm={onConfirm}
+      onCancel={onClose}
+    />
   );
 }

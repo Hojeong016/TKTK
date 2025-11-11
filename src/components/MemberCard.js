@@ -1,6 +1,7 @@
 import React from 'react';
 import { getTierIcon } from '../constants/tiers';
 import useStore from '../store/useStore';
+import { extractStreamingUrl } from '../utils/streamingUrl';
 
 /**
  * member shape:
@@ -44,6 +45,10 @@ export default function MemberCard({ member, onSelect }) {
 
   const streaming = member.streaming || {};
   const staff = member.memberofthestaff?.name || null;
+
+  // StreamingUrl 객체에서 URL 추출
+  const soopUrl = extractStreamingUrl(streaming.soop);
+  const chzzkUrl = extractStreamingUrl(streaming.chzzk);
 
   return (
     <article
@@ -107,11 +112,11 @@ export default function MemberCard({ member, onSelect }) {
 
         <div className="member-footer">
           <div className="member-streams-footer">
-            {streaming.soop && (
-              <a className="stream-btn" href={streaming.soop} target="_blank" rel="noreferrer">Soop</a>
+            {soopUrl && (
+              <a className="stream-btn" href={soopUrl} target="_blank" rel="noreferrer">Soop</a>
             )}
-            {streaming.chzzk && (
-              <a className="stream-btn" href={streaming.chzzk} target="_blank" rel="noreferrer">Chzzk</a>
+            {chzzkUrl && (
+              <a className="stream-btn" href={chzzkUrl} target="_blank" rel="noreferrer">Chzzk</a>
             )}
           </div>
         </div>

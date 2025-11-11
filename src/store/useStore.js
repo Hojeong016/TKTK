@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import rightsService from '../api/rightsService';
 
 export const STATUS = {
   IDLE: 'idle',
@@ -29,27 +30,39 @@ const useStore = create((set, get) => ({
   rightsConfig: [],
   setRightsConfig: (rights) => set({ rightsConfig: rights }),
   loadRightsConfig: async () => {
+    set({ status: STATUS.LOADING });
     try {
-      const response = await fetch('/data/rights.json');
-      const data = await response.json();
-      set({ rightsConfig: data });
+      const data = await rightsService.getRights();
+      set({ rightsConfig: data || [], status: STATUS.SUCCESS });
     } catch (error) {
       console.error('Failed to load rights config:', error);
+      set({ status: STATUS.ERROR });
     }
   },
   getRightConfig: (key) => {
     const { rightsConfig } = get();
     return rightsConfig.find(r => r.key === key);
   },
-  addRight: (right) => set((s) => ({
-    rightsConfig: [...s.rightsConfig, { ...right, id: Date.now() }]
-  })),
-  updateRight: (id, updatedRight) => set((s) => ({
-    rightsConfig: s.rightsConfig.map(r => r.id === id ? { ...r, ...updatedRight } : r)
-  })),
-  deleteRight: (id) => set((s) => ({
-    rightsConfig: s.rightsConfig.filter(r => r.id !== id)
-  })),
+  addRight: async (right) => {
+    const created = await rightsService.createRight(right);
+    set((s) => ({
+      rightsConfig: [...s.rightsConfig, created],
+    }));
+    return created;
+  },
+  updateRight: async (id, updatedRight) => {
+    const updated = await rightsService.updateRight(id, updatedRight);
+    set((s) => ({
+      rightsConfig: s.rightsConfig.map((r) => (r.id === id ? updated : r)),
+    }));
+    return updated;
+  },
+  deleteRight: async (id) => {
+    await rightsService.deleteRight(id);
+    set((s) => ({
+      rightsConfig: s.rightsConfig.filter((r) => r.id !== id),
+    }));
+  },
 }));
 
 export default useStore;

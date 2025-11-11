@@ -123,6 +123,21 @@ const memberService = {
       throw error;
     }
   },
+
+  /**
+   * 멤버 TKTK 티어/레벨 업데이트
+   * @param {string|number} id
+   * @param {{tierName?: string|null, levelCode?: string|null}} payload
+   */
+  async updateTierAssignment(id, payload) {
+    try {
+      const res = await apiClient.patch(`/api/members/${id}/tier`, payload);
+      return res.data;
+    } catch (error) {
+      console.error(`Failed to update member ${id} tier:`, error);
+      throw error;
+    }
+  }
 };
 
 export default memberService;

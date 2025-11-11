@@ -158,6 +158,7 @@
   font-size: 13px;
   font-family: inherit;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
 }
 
 .table-input:focus,
@@ -172,12 +173,59 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 100px;
 }
 
 .tier-icon-tiny {
   width: 20px;
   height: 20px;
   object-fit: contain;
+}
+
+/* Column Widths */
+.management-table th:nth-child(1),
+.management-table td:nth-child(1) {
+  min-width: 100px; /* Name */
+}
+
+.management-table th:nth-child(2),
+.management-table td:nth-child(2) {
+  min-width: 120px; /* Discord 닉네임 */
+}
+
+.management-table th:nth-child(3),
+.management-table td:nth-child(3) {
+  min-width: 110px; /* 생일 */
+}
+
+.management-table th:nth-child(4),
+.management-table td:nth-child(4) {
+  min-width: 150px; /* 권한 */
+}
+
+.management-table th:nth-child(5),
+.management-table td:nth-child(5) {
+  min-width: 100px; /* 게임명 */
+}
+
+.management-table th:nth-child(6),
+.management-table td:nth-child(6) {
+  min-width: 100px; /* 티어 */
+}
+
+.management-table th:nth-child(7),
+.management-table td:nth-child(7) {
+  min-width: 120px; /* Soop */
+}
+
+.management-table th:nth-child(8),
+.management-table td:nth-child(8) {
+  min-width: 120px; /* Chzzk */
+}
+
+.management-table th:nth-child(9),
+.management-table td:nth-child(9) {
+  min-width: 120px; /* 담당 스태프 */
 }
 
 /* Rights Checkboxes */
@@ -230,8 +278,7 @@
 
 /* URL Cell */
 .url-cell {
-  width: 60px;
-  max-width: 60px;
+  min-width: 120px;
   text-align: center;
 }
 
@@ -254,9 +301,11 @@
 
 .table-input-url {
   width: 100%;
-  min-width: 80px;
+  min-width: 100px;
   font-size: 11px;
+  box-sizing: border-box;
 }
+
 
 /* Action Buttons */
 .action-cell {
@@ -605,6 +654,342 @@
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
+.toast {
+  position: fixed;
+  top: 32px;
+  right: 50%;
+  transform: translateX(50%);
+  min-width: 240px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+  color: #0f172a;
+  font-weight: 600;
+  background: #f9fafb;
+  z-index: 1200;
+  border-left: 4px solid #34d399;
+}
+
+.toast-success {
+  border-left-color: #34d399;
+}
+
+.toast-error {
+  border-left-color: #f87171;
+  color: #7f1d1d;
+}
+
+.toast-info {
+  border-left-color: #60a5fa;
+  color: #0c4a6e;
+}
+
+.confirm-modal {
+  max-width: 420px;
+  padding-bottom: 8px;
+}
+
+.confirm-modal-body {
+  padding: 16px 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.confirm-description {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.confirm-modal .form-group {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.confirm-modal .form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.confirm-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+}
+
+.confirm-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.confirm-modal .modal-footer {
+  padding: 16px 24px 24px;
+  margin-top: 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Tier Management Styles */
+.tier-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tier-panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tier-panel.open {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.tier-panel-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 28px 22px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(37, 99, 235, 0.02));
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.tier-panel-header h3 {
+  margin: 6px 0 10px;
+  font-size: 20px;
+  color: #111827;
+  line-height: 1.35;
+}
+
+.tier-panel-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #6b7280;
+}
+
+.tier-panel-overline {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #2563eb;
+  margin: 0 0 4px;
+}
+
+.tier-panel-toggle {
+  font-size: 18px;
+  color: #1f2937;
+}
+
+.tier-panel-body {
+  padding: 24px 28px 32px;
+  animation: fadeIn 0.3s ease;
+}
+
+.tier-scores-section,
+.tier-members-section {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Tier Scores Table - 특화 스타일 */
+.tier-scores-table th {
+  text-align: center;
+  border: 1px solid #e5e7eb;
+}
+
+.tier-scores-table td {
+  text-align: center;
+  border: 1px solid #e5e7eb;
+}
+
+.tier-name-cell {
+  font-weight: 700;
+  font-size: 14px;
+  background: #eff6ff;
+  color: #1e40af;
+  vertical-align: middle;
+}
+
+.level-cell {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.level-상 {
+  background: #fef3c7;
+  color: #78350f;
+}
+
+.level-중 {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.level-하 {
+  background: #d1fae5;
+  color: #064e3b;
+}
+
+.score-cell {
+  position: relative;
+}
+
+.score-value {
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  font-weight: 600;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-value:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.score-edit-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.score-input {
+  width: 70px;
+  padding: 5px 8px;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 13px;
+  text-align: center;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.score-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.score-edit-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-score-save,
+.btn-score-cancel {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.btn-score-save {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.btn-score-save:hover {
+  background: #a7f3d0;
+  transform: translateY(-1px);
+}
+
+.btn-score-cancel {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-score-cancel:hover {
+  background: #fecaca;
+  transform: translateY(-1px);
+}
+
+/* Tier Members Table - tier-badge와 tier-select만 특화 */
+
+.tier-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tier-badge-1tier {
+  background: #fef3c7;
+  color: #78350f;
+}
+
+.tier-badge-2tier {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.tier-badge-3tier {
+  background: #d1fae5;
+  color: #064e3b;
+}
+
+.tier-badge-4tier {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.tier-badge-none {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.tier-select {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  min-width: 110px;
+  background: #ffffff;
+}
+
+.tier-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.tier-select:hover {
+  border-color: #9ca3af;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .settings-page {
@@ -652,5 +1037,42 @@
   .modal-header,
   .modal-body {
     padding: 16px;
+  }
+
+  /* Tier Management Responsive */
+  .tier-panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 22px 20px 18px;
+  }
+
+  .tier-name-cell {
+    font-size: 13px;
+  }
+
+  .level-cell {
+    font-size: 12px;
+  }
+
+  .score-input {
+    width: 60px;
+    font-size: 12px;
+  }
+
+  .btn-score-save,
+  .btn-score-cancel {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .tier-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .tier-select {
+    font-size: 12px;
+    min-width: 100px;
   }
 }

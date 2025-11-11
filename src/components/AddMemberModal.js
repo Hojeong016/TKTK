@@ -1,6 +1,16 @@
 import React from 'react';
 import useStore from '../store/useStore';
 import { useCreateItem } from '../api/useFetch';
+import Toast from './Toast';
+import useToast from '../hooks/useToast';
+
+/**
+ * 티어 값을 서버 형식으로 변환 (프론트: "Ace" -> 서버: "ACE")
+ */
+const toServerTier = (tier) => {
+  if (!tier) return '';
+  return String(tier).toUpperCase();
+};
 
 /**
  * AddMemberModal - 새 멤버 추가 모달
@@ -9,6 +19,7 @@ import { useCreateItem } from '../api/useFetch';
 export default function AddMemberModal({ isOpen, onClose }) {
   const { rightsConfig } = useStore();
   const createMutation = useCreateItem();
+  const { toast, showToast } = useToast();
   const [inputMode, setInputMode] = React.useState('form'); // 'form' or 'yaml'
   const [formData, setFormData] = React.useState({
     name: '',
@@ -20,7 +31,8 @@ export default function AddMemberModal({ isOpen, onClose }) {
     birthday: '',
     soopUrl: '',
     chzzkUrl: '',
-    tktkTier: ''  // TKTK 티어 추가
+    tktkTier: '',  // TKTK 티어 추가
+    tktkTierLevel: '' // 상/중/하 선택
   });
   const [yamlContent, setYamlContent] = React.useState('');
   const [fileName, setFileName] = React.useState('');
@@ -59,7 +71,7 @@ export default function AddMemberModal({ isOpen, onClose }) {
         console.log('YAML content:', content);
       } catch (error) {
         console.error('YAML parsing error:', error);
-        alert('YAML 파일 파싱 중 오류가 발생했습니다.');
+        showToast('error', 'YAML 파일 파싱 중 오류가 발생했습니다.');
       }
     };
     reader.readAsText(file);
@@ -85,7 +97,7 @@ export default function AddMemberModal({ isOpen, onClose }) {
           join: new Date().toISOString()
         },
         game: {
-          tier: formData.tier,
+          tier: toServerTier(formData.tier), // 프론트: "Ace" -> 서버: "ACE"
           gamename: formData.gamename
         },
         streaming: {
@@ -95,25 +107,26 @@ export default function AddMemberModal({ isOpen, onClose }) {
         memberofthestaff: {
           name: ''
         },
-        tktkTier: formData.tktkTier  // TKTK 티어 이름 추가
+        tktkTier: formData.tktkTier,  // TKTK 티어 이름 추가
+        tktkTierLevel: formData.tktkTierLevel
       };
 
       // API 호출
       createMutation.mutate(newMemberData, {
         onSuccess: () => {
-          alert('멤버가 성공적으로 추가되었습니다.');
+          showToast('success', '멤버가 성공적으로 추가되었습니다.');
           handleClose();
         },
         onError: (error) => {
           console.error('Failed to create member:', error);
-          alert('멤버 추가에 실패했습니다: ' + error.message);
+          showToast('error', `멤버 추가에 실패했습니다: ${error.message}`);
         },
       });
     } else {
       // YAML 모드
       // TODO: YAML 파싱 후 API 호출
       console.log('Submitting YAML data:', yamlContent);
-      alert('YAML 파일 업로드 기능은 추후 구현 예정입니다.');
+      showToast('info', 'YAML 파일 업로드 기능은 추후 구현 예정입니다.');
       handleClose();
     }
   };
@@ -129,7 +142,8 @@ export default function AddMemberModal({ isOpen, onClose }) {
       birthday: '',
       soopUrl: '',
       chzzkUrl: '',
-      tktkTier: ''
+      tktkTier: '',
+      tktkTierLevel: ''
     });
     setYamlContent('');
     setFileName('');
@@ -140,7 +154,8 @@ export default function AddMemberModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={handleClose}>
+    <>
+      <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">새 멤버 추가</h2>
@@ -178,18 +193,7 @@ export default function AddMemberModal({ isOpen, onClose }) {
               </div>
 
               <div className="form-group">
-                <label htmlFor="koreaname">한글명</label>
-                <input
-                  id="koreaname"
-                  type="text"
-                  value={formData.koreaname}
-                  onChange={(e) => handleInputChange('koreaname', e.target.value)}
-                  className="form-input"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="discordname">디스코드</label>
+                <label htmlFor="discordname">디스코드 닉네임</label>
                 <input
                   id="discordname"
                   type="text"
@@ -256,6 +260,22 @@ export default function AddMemberModal({ isOpen, onClose }) {
                   <option value="2tier">2tier</option>
                   <option value="3tier">3tier</option>
                   <option value="4tier">4tier</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="tktkTierLevel">TKTK 티어 레벨</label>
+                <select
+                  id="tktkTierLevel"
+                  value={formData.tktkTierLevel}
+                  onChange={(e) => handleInputChange('tktkTierLevel', e.target.value)}
+                  className="form-select"
+                  disabled={!formData.tktkTier}
+                >
+                  <option value="">상/중/하 선택</option>
+                  <option value="UPPER">상</option>
+                  <option value="MID">중</option>
+                  <option value="LOW">하</option>
                 </select>
               </div>
 
@@ -367,5 +387,7 @@ streaming:
         </form>
       </div>
     </div>
+    <Toast open={!!toast} message={toast?.message} type={toast?.type || 'success'} />
+    </>
   );
 }

@@ -1,5 +1,8 @@
 import React from 'react';
 import useStore from '../store/useStore';
+import Toast from './Toast';
+import useToast from '../hooks/useToast';
+import ConfirmModal from './ConfirmModal';
 
 /**
  * RightsManagement - 권한 설정 CRUD 관리
@@ -16,6 +19,8 @@ export default function RightsManagement() {
     bgColor: '#ffffff',
     description: ''
   });
+  const [deleteTarget, setDeleteTarget] = React.useState(null);
+  const { toast, showToast } = useToast();
 
   const handleEdit = (right) => {
     setEditingId(right.id);
@@ -27,35 +32,59 @@ export default function RightsManagement() {
     setEditData(null);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editData) {
-      updateRight(editingId, editData);
-      setEditingId(null);
-      setEditData(null);
+      try {
+        await updateRight(editingId, editData);
+        setEditingId(null);
+        setEditData(null);
+        showToast('success', '권한이 수정되었습니다.');
+      } catch (error) {
+        console.error('Failed to update right', error);
+        showToast('error', '권한 수정에 실패했습니다.');
+      }
     }
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('이 권한을 삭제하시겠습니까?')) {
-      deleteRight(id);
+    const target = rightsConfig.find((right) => right.id === id);
+    setDeleteTarget(target || null);
+  };
+
+  const handleAddRight = async (e) => {
+    e.preventDefault();
+    if (!newRight.key || !newRight.label) {
+      showToast('error', '키와 라벨은 필수입니다.');
+      return;
+    }
+    try {
+      await addRight(newRight);
+      setNewRight({
+        key: '',
+        label: '',
+        color: '#000000',
+        bgColor: '#ffffff',
+        description: ''
+      });
+      setShowAddModal(false);
+      showToast('success', '새 권한이 추가되었습니다.');
+    } catch (error) {
+      console.error('Failed to add right', error);
+      showToast('error', '권한 추가에 실패했습니다.');
     }
   };
 
-  const handleAddRight = (e) => {
-    e.preventDefault();
-    if (!newRight.key || !newRight.label) {
-      alert('키와 라벨은 필수입니다.');
-      return;
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteRight(deleteTarget.id);
+      showToast('success', '권한이 삭제되었습니다.');
+    } catch (error) {
+      console.error('Failed to delete right', error);
+      showToast('error', '권한 삭제에 실패했습니다.');
+    } finally {
+      setDeleteTarget(null);
     }
-    addRight(newRight);
-    setNewRight({
-      key: '',
-      label: '',
-      color: '#000000',
-      bgColor: '#ffffff',
-      description: ''
-    });
-    setShowAddModal(false);
   };
 
   return (
@@ -204,7 +233,6 @@ export default function RightsManagement() {
           </tbody>
         </table>
       </div>
-
       {/* Add Modal */}
       {showAddModal && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
@@ -323,6 +351,15 @@ export default function RightsManagement() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="권한 삭제"
+        description={`"${deleteTarget?.label || deleteTarget?.key || '해당 권한'}" 권한을 삭제하시겠습니까?`}
+        confirmLabel="삭제"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+      <Toast open={!!toast} message={toast?.message} type={toast?.type || 'success'} />
     </div>
   );
 }

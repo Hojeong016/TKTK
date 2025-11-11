@@ -139,7 +139,8 @@
 
 /* Team Stats Section */
 .team-stats {
-  padding: 16px 20px;
+  margin: -16px -16px 16px;
+  padding: 14px 16px;
   background: rgba(0, 0, 0, 0.02);
   border-bottom: 1px solid #e5e7eb;
   display: flex;

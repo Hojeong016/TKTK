@@ -3,6 +3,27 @@ import { useFetchItems, useUpdateItem, useDeleteItem } from '../api/useFetch';
 import { getTierIcon } from '../constants/tiers';
 import useStore from '../store/useStore';
 import AddMemberModal from './AddMemberModal';
+import { extractStreamingUrl } from '../utils/streamingUrl';
+import Toast from './Toast';
+import useToast from '../hooks/useToast';
+import ConfirmModal from './ConfirmModal';
+
+/**
+ * 티어 값 정규화 (서버: "ACE" -> 프론트: "Ace")
+ */
+const normalizeTier = (tier) => {
+  if (!tier) return '';
+  const tierStr = String(tier);
+  return tierStr.charAt(0).toUpperCase() + tierStr.slice(1).toLowerCase();
+};
+
+/**
+ * 티어 값을 서버 형식으로 변환 (프론트: "Ace" -> 서버: "ACE")
+ */
+const toServerTier = (tier) => {
+  if (!tier) return '';
+  return String(tier).toUpperCase();
+};
 
 /**
  * MemberManagementTable - 관리자용 멤버 관리 테이블
@@ -14,6 +35,8 @@ export default function MemberManagementTable() {
   const [editingId, setEditingId] = React.useState(null);
   const [editData, setEditData] = React.useState({});
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [deleteTarget, setDeleteTarget] = React.useState(null);
+  const { toast, showToast } = useToast();
 
   // API Mutation 훅
   const updateMutation = useUpdateItem();
@@ -24,16 +47,39 @@ export default function MemberManagementTable() {
     const rightValue = member.discord?.right || [];
     const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
 
+    // birthday 날짜 형식 변환 (ISO 형식이면 YYYY-MM-DD만 추출)
+    let birthdayValue = member.info?.birthday || '';
+    if (birthdayValue && birthdayValue.includes('T')) {
+      birthdayValue = birthdayValue.split('T')[0];
+    }
+
+    // StreamingUrl 객체에서 URL 문자열 추출
+    const soopUrl = extractStreamingUrl(member.streaming?.soop);
+    const chzzkUrl = extractStreamingUrl(member.streaming?.chzzk);
+
+    // 티어 값 정규화 (서버: "ACE" -> 프론트: "Ace")
+    const normalizedTier = normalizeTier(member.game?.tier);
+
     setEditData({
       name: member.name || '',
-      koreaname: member.info?.koreaname || '',
       discordname: member.info?.discordname || '',
-      gamename: member.game?.gamename || member.info?.gamename || '',
-      tier: member.game?.tier || '',
+      birthday: birthdayValue,
       rights: rights,
-      birthday: member.info?.birthday || '',
-      soopUrl: member.streaming?.soop || '',
-      chzzkUrl: member.streaming?.chzzk || ''
+      gamename: member.game?.gamename || '',
+      tier: normalizedTier,
+      soopUrl: soopUrl,
+      chzzkUrl: chzzkUrl,
+      staffName: member.memberofthestaff?.name || ''
+    });
+
+    // 디버깅을 위한 로그
+    console.log('Editing member:', {
+      id: member.id,
+      name: member.name,
+      rawTier: member.game?.tier,
+      normalizedTier: normalizedTier,
+      rights: rights,
+      birthday: birthdayValue
     });
   };
 
@@ -48,26 +94,19 @@ export default function MemberManagementTable() {
   };
 
   const handleSave = (memberId) => {
-    // 원본 멤버 데이터 찾기
-    const originalMember = data.find(m => m.id === memberId);
-
     // 수정된 데이터를 서버 DTO 형식으로 변환
     const updatedMemberData = {
+      id: memberId,
       name: editData.name,
       info: {
         discordname: editData.discordname,
-        gamename: editData.gamename,
-        koreaname: editData.koreaname,
-        birthday: editData.birthday,
-        description: originalMember?.info?.description || ''
+        birthday: editData.birthday
       },
       discord: {
-        right: editData.rights,
-        discordTierId: originalMember?.discord?.discordTierId || null,
-        join: originalMember?.discord?.join || new Date().toISOString()
+        right: editData.rights
       },
       game: {
-        tier: editData.tier,
+        tier: toServerTier(editData.tier), // 프론트: "Ace" -> 서버: "ACE"
         gamename: editData.gamename
       },
       streaming: {
@@ -75,7 +114,7 @@ export default function MemberManagementTable() {
         chzzk: editData.chzzkUrl
       },
       memberofthestaff: {
-        name: originalMember?.memberofthestaff?.name || ''
+        name: editData.staffName
       }
     };
 
@@ -84,13 +123,13 @@ export default function MemberManagementTable() {
       { id: memberId, data: updatedMemberData },
       {
         onSuccess: () => {
-          alert('멤버 정보가 성공적으로 수정되었습니다.');
+          showToast('success', '멤버 정보가 성공적으로 수정되었습니다.');
           setEditingId(null);
           setEditData({});
         },
         onError: (error) => {
           console.error('Failed to update member:', error);
-          alert('멤버 정보 수정에 실패했습니다: ' + error.message);
+          showToast('error', `멤버 정보 수정에 실패했습니다: ${error.message}`);
         },
       }
     );
@@ -102,17 +141,21 @@ export default function MemberManagementTable() {
   };
 
   const handleDelete = (member) => {
-    if (window.confirm(`정말로 "${member.name}" 멤버를 삭제하시겠습니까?`)) {
-      deleteMutation.mutate(member.id, {
-        onSuccess: () => {
-          alert('멤버가 성공적으로 삭제되었습니다.');
-        },
-        onError: (error) => {
-          console.error('Failed to delete member:', error);
-          alert('멤버 삭제에 실패했습니다: ' + error.message);
-        },
-      });
-    }
+    setDeleteTarget(member);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        showToast('success', '멤버가 성공적으로 삭제되었습니다.');
+        setDeleteTarget(null);
+      },
+      onError: (error) => {
+        console.error('Failed to delete member:', error);
+        showToast('error', `멤버 삭제에 실패했습니다: ${error.message}`);
+      },
+    });
   };
 
   const handleInputChange = (field, value) => {
@@ -146,15 +189,15 @@ export default function MemberManagementTable() {
         <table className="management-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>Name</th>
               <th>Discord 닉네임</th>
-              <th>한글명</th>
+              <th>생일</th>
+              <th>권한</th>
               <th>게임명</th>
               <th>티어</th>
-              <th>권한</th>
-              <th>생일</th>
               <th>Soop</th>
               <th>Chzzk</th>
+              <th>담당 스태프</th>
               <th>작업</th>
             </tr>
           </thead>
@@ -164,14 +207,26 @@ export default function MemberManagementTable() {
 
               return (
                 <tr key={member.id} className={isEditing ? 'editing-row' : ''}>
-                  <td>{member.id}</td>
+                  {/* Name */}
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editData.name || ''}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        className="table-input"
+                      />
+                    ) : (
+                      member.name || '—'
+                    )}
+                  </td>
 
                   {/* Discord 닉네임 */}
                   <td>
                     {isEditing ? (
                       <input
                         type="text"
-                        value={editData.discordname}
+                        value={editData.discordname || ''}
                         onChange={(e) => handleInputChange('discordname', e.target.value)}
                         className="table-input"
                       />
@@ -180,59 +235,17 @@ export default function MemberManagementTable() {
                     )}
                   </td>
 
-                  {/* 한글명 */}
-                  <td>
+                  {/* 생일 */}
+                  <td className="birthday-cell">
                     {isEditing ? (
                       <input
-                        type="text"
-                        value={editData.koreaname}
-                        onChange={(e) => handleInputChange('koreaname', e.target.value)}
+                        type="date"
+                        value={editData.birthday || ''}
+                        onChange={(e) => handleInputChange('birthday', e.target.value)}
                         className="table-input"
                       />
                     ) : (
-                      member.info?.koreaname || '—'
-                    )}
-                  </td>
-
-                  {/* 게임명 */}
-                  <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editData.gamename}
-                        onChange={(e) => handleInputChange('gamename', e.target.value)}
-                        className="table-input"
-                      />
-                    ) : (
-                      member.game?.gamename || member.info?.gamename || '—'
-                    )}
-                  </td>
-
-                  {/* 티어 */}
-                  <td>
-                    {isEditing ? (
-                      <select
-                        value={editData.tier}
-                        onChange={(e) => handleInputChange('tier', e.target.value)}
-                        className="table-select"
-                      >
-                        <option value="">선택</option>
-                        <option value="Conqueror">Conqueror</option>
-                        <option value="Master">Master</option>
-                        <option value="Ace">Ace</option>
-                        <option value="Crown">Crown</option>
-                        <option value="Diamond">Diamond</option>
-                        <option value="Platinum">Platinum</option>
-                        <option value="Gold">Gold</option>
-                        <option value="Silver">Silver</option>
-                        <option value="Bronze">Bronze</option>
-                        <option value="Free">Free</option>
-                      </select>
-                    ) : (
-                      <div className="tier-cell">
-                        {getTierIcon(member.game?.tier, { className: 'tier-icon-tiny' })}
-                        <span>{member.game?.tier || 'Free'}</span>
-                      </div>
+                      member.info?.birthday || '—'
                     )}
                   </td>
 
@@ -277,17 +290,45 @@ export default function MemberManagementTable() {
                     )}
                   </td>
 
-                  {/* 생일 */}
-                  <td className="birthday-cell">
+                  {/* 게임명 */}
+                  <td>
                     {isEditing ? (
                       <input
-                        type="date"
-                        value={editData.birthday}
-                        onChange={(e) => handleInputChange('birthday', e.target.value)}
+                        type="text"
+                        value={editData.gamename || ''}
+                        onChange={(e) => handleInputChange('gamename', e.target.value)}
                         className="table-input"
                       />
                     ) : (
-                      member.info?.birthday || '—'
+                      member.game?.gamename || '—'
+                    )}
+                  </td>
+
+                  {/* 티어 */}
+                  <td>
+                    {isEditing ? (
+                      <select
+                        value={editData.tier || ''}
+                        onChange={(e) => handleInputChange('tier', e.target.value)}
+                        className="table-select"
+                      >
+                        <option value="">선택</option>
+                        <option value="Conqueror">Conqueror</option>
+                        <option value="Master">Master</option>
+                        <option value="Ace">Ace</option>
+                        <option value="Crown">Crown</option>
+                        <option value="Diamond">Diamond</option>
+                        <option value="Platinum">Platinum</option>
+                        <option value="Gold">Gold</option>
+                        <option value="Silver">Silver</option>
+                        <option value="Bronze">Bronze</option>
+                        <option value="Free">Free</option>
+                      </select>
+                    ) : (
+                      <div className="tier-cell">
+                        {getTierIcon(member.game?.tier, { className: 'tier-icon-tiny' })}
+                        <span>{member.game?.tier || 'Free'}</span>
+                      </div>
                     )}
                   </td>
 
@@ -296,17 +337,20 @@ export default function MemberManagementTable() {
                     {isEditing ? (
                       <input
                         type="url"
-                        value={editData.soopUrl}
+                        value={editData.soopUrl || ''}
                         onChange={(e) => handleInputChange('soopUrl', e.target.value)}
                         className="table-input table-input-url"
                         placeholder="URL"
                       />
                     ) : (
-                      member.streaming?.soop ? (
-                        <a href={member.streaming.soop} target="_blank" rel="noreferrer" className="url-link" title={member.streaming.soop}>
-                          링크
-                        </a>
-                      ) : '—'
+                      (() => {
+                        const soopUrl = extractStreamingUrl(member.streaming?.soop);
+                        return soopUrl ? (
+                          <a href={soopUrl} target="_blank" rel="noreferrer" className="url-link" title={soopUrl}>
+                            링크
+                          </a>
+                        ) : '—';
+                      })()
                     )}
                   </td>
 
@@ -315,17 +359,34 @@ export default function MemberManagementTable() {
                     {isEditing ? (
                       <input
                         type="url"
-                        value={editData.chzzkUrl}
+                        value={editData.chzzkUrl || ''}
                         onChange={(e) => handleInputChange('chzzkUrl', e.target.value)}
                         className="table-input table-input-url"
                         placeholder="URL"
                       />
                     ) : (
-                      member.streaming?.chzzk ? (
-                        <a href={member.streaming.chzzk} target="_blank" rel="noreferrer" className="url-link" title={member.streaming.chzzk}>
-                          링크
-                        </a>
-                      ) : '—'
+                      (() => {
+                        const chzzkUrl = extractStreamingUrl(member.streaming?.chzzk);
+                        return chzzkUrl ? (
+                          <a href={chzzkUrl} target="_blank" rel="noreferrer" className="url-link" title={chzzkUrl}>
+                            링크
+                          </a>
+                        ) : '—';
+                      })()
+                    )}
+                  </td>
+
+                  {/* 담당 스태프 */}
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editData.staffName || ''}
+                        onChange={(e) => handleInputChange('staffName', e.target.value)}
+                        className="table-input"
+                      />
+                    ) : (
+                      member.memberofthestaff?.name || '—'
                     )}
                   </td>
 
@@ -374,6 +435,15 @@ export default function MemberManagementTable() {
         </table>
       </div>
       )}
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="멤버 삭제"
+        description={`"${deleteTarget?.name || '해당 멤버'}" 멤버를 삭제하시겠습니까?`}
+        confirmLabel="삭제"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+      <Toast open={!!toast} message={toast?.message} type={toast?.type || 'success'} />
     </div>
   );
 }

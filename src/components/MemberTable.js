@@ -1,6 +1,7 @@
 import React from 'react';
 import { getTierIcon, TIERS } from '../constants/tiers';
 import useStore from '../store/useStore';
+import { extractStreamingUrl } from '../utils/streamingUrl';
 
 /**
  * data: [{...member}]
@@ -37,6 +38,11 @@ export default function MemberTable({ data = [], onSelect }) {
             const discordName = m.info?.discordname || '—';
             const rightValue = m.discord?.right || [];
             const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
+
+            // StreamingUrl 객체에서 URL 추출
+            const soopUrl = extractStreamingUrl(m.streaming?.soop);
+            const chzzkUrl = extractStreamingUrl(m.streaming?.chzzk);
+
             return (
               <tr key={m.id} onClick={() => onSelect?.(m)} tabIndex={0}>
                 <td data-label="Member">{m.info?.koreaname || m.name}<div className="td-sub">{gamename}</div></td>
@@ -70,8 +76,8 @@ export default function MemberTable({ data = [], onSelect }) {
                 <td data-label="Joined">{fmtJoin(m.discord?.join)}</td>
                 <td data-label="Streams">
                   <div className="td-streams">
-                    {m.streaming?.soop && <a className="stream-btn small" href={m.streaming.soop} target="_blank" rel="noreferrer">Soop</a>}
-                    {m.streaming?.chzzk && <a className="stream-btn small" href={m.streaming.chzzk} target="_blank" rel="noreferrer">Chzzk</a>}
+                    {soopUrl && <a className="stream-btn small" href={soopUrl} target="_blank" rel="noreferrer">Soop</a>}
+                    {chzzkUrl && <a className="stream-btn small" href={chzzkUrl} target="_blank" rel="noreferrer">Chzzk</a>}
                   </div>
                 </td>
                 <td data-label="Staff">{m.memberofthestaff?.name || '—'}</td>
