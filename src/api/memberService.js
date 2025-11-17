@@ -137,6 +137,21 @@ const memberService = {
       console.error(`Failed to update member ${id} tier:`, error);
       throw error;
     }
+  },
+
+  /**
+   * 게임 정보 연동 재시도
+   * @param {string} gameName - 게임 이름
+   * @returns {Promise<any>} 연동 결과
+   */
+  async retryGameSync(gameName) {
+    try {
+      const res = await apiClient.post(`/api/member/accountId/${gameName}`);
+      return res.data;
+    } catch (error) {
+      console.error(`Failed to retry game sync for ${gameName}:`, error);
+      throw error;
+    }
   }
 };
 

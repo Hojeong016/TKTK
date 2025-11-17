@@ -1076,3 +1076,97 @@
     min-width: 100px;
   }
 }
+
+/* ====================================== */
+/* Sync Status Row Styles */
+/* ====================================== */
+
+/* FAILED 상태 - 연한 빨간색 배경 */
+.sync-failed-row {
+  background-color: #fff3f3 !important;
+  transition: background-color 0.2s ease;
+}
+
+.sync-failed-row:hover {
+  background-color: #ffe6e6 !important;
+}
+
+/* PENDING 상태 - 연한 노란색 배경 */
+.sync-pending-row {
+  background-color: #fffbf0 !important;
+  transition: background-color 0.2s ease;
+}
+
+.sync-pending-row:hover {
+  background-color: #fff9e6 !important;
+}
+
+/* REQUEST 상태 - 연한 파란색 배경 */
+.sync-requesting-row {
+  background-color: #eff6ff !important;
+  transition: background-color 0.2s ease;
+}
+
+.sync-requesting-row:hover {
+  background-color: #dbeafe !important;
+}
+
+/* 재시도/연동 버튼 공통 스타일 */
+.btn-retry {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 32px;
+  background: transparent;
+}
+
+.btn-retry:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* FAILED용 재시도 버튼 - 빨간 아이콘 */
+.btn-retry-failed {
+  color: #dc2626;
+}
+
+.btn-retry-failed:hover:not(:disabled) {
+  background: #fee2e2;
+  transform: scale(1.1);
+}
+
+.btn-retry-failed:active:not(:disabled) {
+  transform: scale(1);
+}
+
+/* PENDING용 연동 시작 버튼 - 파란 아이콘 */
+.btn-retry-pending {
+  color: #2563eb;
+}
+
+.btn-retry-pending:hover:not(:disabled) {
+  background: #dbeafe;
+  transform: scale(1.1);
+}
+
+.btn-retry-pending:active:not(:disabled) {
+  transform: scale(1);
+}
+
+/* REQUEST용 로딩 버튼 - 회색 아이콘 (비활성화) */
+.btn-retry-requesting {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-retry-requesting:hover {
+  background: transparent;
+  transform: none;
+}

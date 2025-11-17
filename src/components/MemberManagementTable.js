@@ -7,6 +7,8 @@ import { extractStreamingUrl } from '../utils/streamingUrl';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
 import ConfirmModal from './ConfirmModal';
+import memberService from '../api/memberService';
+import { useQueryClient } from '@tanstack/react-query';
 
 /**
  * 티어 값 정규화 (서버: "ACE" -> 프론트: "Ace")
@@ -36,7 +38,9 @@ export default function MemberManagementTable() {
   const [editData, setEditData] = React.useState({});
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [deleteTarget, setDeleteTarget] = React.useState(null);
+  const [retryingId, setRetryingId] = React.useState(null);
   const { toast, showToast } = useToast();
+  const queryClient = useQueryClient();
 
   // API Mutation 훅
   const updateMutation = useUpdateItem();
@@ -158,6 +162,30 @@ export default function MemberManagementTable() {
     });
   };
 
+  const handleRetry = async (member) => {
+    const gameName = member.game?.gamename;
+    if (!gameName) {
+      showToast('error', '게임명이 없어 재시도할 수 없습니다.');
+      return;
+    }
+
+    setRetryingId(member.id);
+    try {
+      await memberService.retryGameSync(gameName);
+      showToast('success', '게임 정보 연동을 재시도합니다. 게임 이름을 다시 한번 확인해주세요');
+
+      // 3초 후 데이터 새로고침
+      setTimeout(() => {
+        queryClient.invalidateQueries(['items']);
+        setRetryingId(null);
+      }, 3000);
+    } catch (error) {
+      console.error('Failed to retry game sync:', error);
+      showToast('error', `게임 정보 연동 재시도에 실패했습니다: ${error.message || '알 수 없는 오류'}`);
+      setRetryingId(null);
+    }
+  };
+
   const handleInputChange = (field, value) => {
     setEditData(prev => ({
       ...prev,
@@ -204,9 +232,21 @@ export default function MemberManagementTable() {
           <tbody>
             {data.map((member) => {
               const isEditing = editingId === member.id;
+              const syncStatus = member.game?.syncStatus;
+              const isSyncFailed = syncStatus === 'FAILED';
+              const isSyncPending = syncStatus === 'PENDING';
+              const isRequesting = syncStatus === 'REQUEST';
+              const needsSync = isSyncFailed || isSyncPending;
+
+              // 행 클래스 결정
+              let rowClass = '';
+              if (isEditing) rowClass = 'editing-row';
+              else if (isSyncFailed) rowClass = 'sync-failed-row';
+              else if (isSyncPending) rowClass = 'sync-pending-row';
+              else if (isRequesting) rowClass = 'sync-requesting-row';
 
               return (
-                <tr key={member.id} className={isEditing ? 'editing-row' : ''}>
+                <tr key={member.id} className={rowClass}>
                   {/* 작업 버튼 */}
                   <td className="action-cell">
                     {isEditing ? (
@@ -230,10 +270,32 @@ export default function MemberManagementTable() {
                       </div>
                     ) : (
                       <div className="action-buttons">
+                        {(needsSync || isRequesting) && (
+                          <button
+                            className={
+                              isRequesting
+                                ? 'btn-retry btn-retry-requesting'
+                                : isSyncFailed
+                                  ? 'btn-retry btn-retry-failed'
+                                  : 'btn-retry btn-retry-pending'
+                            }
+                            onClick={() => handleRetry(member)}
+                            disabled={retryingId === member.id || isRequesting}
+                            title={
+                              isRequesting
+                                ? '게임 정보 연동 중...\n잠시만 기다려주세요.'
+                                : isSyncFailed
+                                  ? `게임 정보 연동 재시도${member.game?.failReason ? `\n실패 사유: ${member.game.failReason}` : ''}${member.game?.retryCount ? `\n재시도 횟수: ${member.game.retryCount}회` : ''}`
+                                  : '게임 정보 연동 시작\n아직 PUBG 계정과 연동되지 않았습니다.'
+                            }
+                          >
+                            {isRequesting ? '⏳' : (retryingId === member.id ? '⏳' : (isSyncFailed ? '🔄' : '▶️'))}
+                          </button>
+                        )}
                         <button
                           className="btn-edit"
                           onClick={() => handleEdit(member)}
-                          disabled={deleteMutation.isPending}
+                          disabled={deleteMutation.isPending || retryingId === member.id || isRequesting}
                           title="수정"
                         >
                           ✏️
@@ -241,7 +303,7 @@ export default function MemberManagementTable() {
                         <button
                           className="btn-delete"
                           onClick={() => handleDelete(member)}
-                          disabled={deleteMutation.isPending}
+                          disabled={deleteMutation.isPending || retryingId === member.id || isRequesting}
                           title="삭제"
                         >
                           {deleteMutation.isPending ? '⏳' : '🗑️'}
