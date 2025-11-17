@@ -189,6 +189,7 @@ export default function MemberManagementTable() {
         <table className="management-table">
           <thead>
             <tr>
+              <th>작업</th>
               <th>Name</th>
               <th>Discord 닉네임</th>
               <th>생일</th>
@@ -198,7 +199,6 @@ export default function MemberManagementTable() {
               <th>Soop</th>
               <th>Chzzk</th>
               <th>담당 스태프</th>
-              <th>작업</th>
             </tr>
           </thead>
           <tbody>
@@ -207,6 +207,49 @@ export default function MemberManagementTable() {
 
               return (
                 <tr key={member.id} className={isEditing ? 'editing-row' : ''}>
+                  {/* 작업 버튼 */}
+                  <td className="action-cell">
+                    {isEditing ? (
+                      <div className="action-buttons">
+                        <button
+                          className="btn-save"
+                          onClick={() => handleSave(member.id)}
+                          disabled={updateMutation.isPending}
+                          title="저장"
+                        >
+                          {updateMutation.isPending ? '⏳' : '✅'}
+                        </button>
+                        <button
+                          className="btn-cancel"
+                          onClick={handleCancel}
+                          disabled={updateMutation.isPending}
+                          title="취소"
+                        >
+                          ❌
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="action-buttons">
+                        <button
+                          className="btn-edit"
+                          onClick={() => handleEdit(member)}
+                          disabled={deleteMutation.isPending}
+                          title="수정"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          className="btn-delete"
+                          onClick={() => handleDelete(member)}
+                          disabled={deleteMutation.isPending}
+                          title="삭제"
+                        >
+                          {deleteMutation.isPending ? '⏳' : '🗑️'}
+                        </button>
+                      </div>
+                    )}
+                  </td>
+
                   {/* Name */}
                   <td>
                     {isEditing ? (
@@ -322,12 +365,12 @@ export default function MemberManagementTable() {
                         <option value="Gold">Gold</option>
                         <option value="Silver">Silver</option>
                         <option value="Bronze">Bronze</option>
-                        <option value="Free">Free</option>
+                        <option value="Unranked">Unranked</option>
                       </select>
                     ) : (
                       <div className="tier-cell">
                         {getTierIcon(member.game?.tier, { className: 'tier-icon-tiny' })}
-                        <span>{member.game?.tier || 'Free'}</span>
+                        <span>{member.game?.tier || 'Unranked'}</span>
                       </div>
                     )}
                   </td>
@@ -387,45 +430,6 @@ export default function MemberManagementTable() {
                       />
                     ) : (
                       member.memberofthestaff?.name || '—'
-                    )}
-                  </td>
-
-                  {/* 작업 버튼 */}
-                  <td className="action-cell">
-                    {isEditing ? (
-                      <div className="action-buttons">
-                        <button
-                          className="btn-save"
-                          onClick={() => handleSave(member.id)}
-                          disabled={updateMutation.isPending}
-                        >
-                          {updateMutation.isPending ? '저장 중...' : '저장'}
-                        </button>
-                        <button
-                          className="btn-cancel"
-                          onClick={handleCancel}
-                          disabled={updateMutation.isPending}
-                        >
-                          취소
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="action-buttons">
-                        <button
-                          className="btn-edit"
-                          onClick={() => handleEdit(member)}
-                          disabled={deleteMutation.isPending}
-                        >
-                          수정
-                        </button>
-                        <button
-                          className="btn-delete"
-                          onClick={() => handleDelete(member)}
-                          disabled={deleteMutation.isPending}
-                        >
-                          {deleteMutation.isPending ? '삭제 중...' : '삭제'}
-                        </button>
-                      </div>
                     )}
                   </td>
                 </tr>

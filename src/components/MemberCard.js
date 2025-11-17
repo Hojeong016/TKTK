@@ -22,7 +22,7 @@ export default function MemberCard({ member, onSelect }) {
   const gamename = member.game?.gamename || member.info?.gamename || member.name || 'Unknown';
   const displayName = member.info?.koreaname || member.name || gamename;
   const discordName = member.info?.discordname || '—';
-  const tier = member.game?.tier || 'free';
+  const tier = member.game?.tier || 'Unranked';
 
   // right를 배열로 처리
   const rightValue = member.discord?.right || [];

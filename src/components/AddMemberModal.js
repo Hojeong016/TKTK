@@ -232,7 +232,7 @@ export default function AddMemberModal({ isOpen, onClose }) {
                   <option value="Gold">Gold</option>
                   <option value="Silver">Silver</option>
                   <option value="Bronze">Bronze</option>
-                  <option value="Free">Free</option>
+                  <option value="Unranked">Unranked</option>
                 </select>
               </div>
 

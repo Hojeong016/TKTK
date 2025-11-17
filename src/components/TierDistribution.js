@@ -12,7 +12,7 @@ export default function TierDistribution() {
 
     const counts = {};
     data.forEach((member) => {
-      const tier = member.game?.tier || 'Free';
+      const tier = member.game?.tier || 'Unranked';
       counts[tier] = (counts[tier] || 0) + 1;
     });
 
@@ -34,7 +34,7 @@ export default function TierDistribution() {
       gold: 'linear-gradient(90deg, #fdcb6e, #ffeaa7)',
       silver: 'linear-gradient(90deg, #b2bec3, #dfe6e9)',
       bronze: 'linear-gradient(90deg, #d63031, #ff7675)',
-      free: 'linear-gradient(90deg, #636e72, #b2bec3)'
+      Unranked: 'linear-gradient(90deg, #636e72, #b2bec3)'
     };
     return gradients[tierLower] || 'linear-gradient(90deg, #3b82f6, #2563eb)';
   };

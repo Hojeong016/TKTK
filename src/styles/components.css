@@ -339,7 +339,7 @@
   box-shadow:0 6px 12px rgba(16,24,40,0.08);
 }
 /* tier color variants */
-.tier-free { background: #64748b; }
+.tier-Unranked { background: #64748b; }
 .tier-bronze { background: #b97a2b; }
 .tier-silver { background: #9ca3af; }
 .tier-gold { background: #f59e0b; }

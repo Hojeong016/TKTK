@@ -9,6 +9,7 @@ export const TIERS = {
   MASTER: { key: 'master', label: 'Master' },
   CHALLENGER: { key: 'challenger', label: 'Challenger' },
   CONQUEROR: { key: 'conqueror', label: 'Conqueror' },
+  UNRANKED: { key: 'unranked', label: 'Unranked' },
 };
 
 export function getTierIcon(tierValue, props = {}) {
