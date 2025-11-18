@@ -1,3 +1,5 @@
+import tokenStorage from '../utils/tokenStorage';
+
 /**
  * API 클라이언트 클래스
  * 서버 통신을 담당하는 중앙화된 API 클래스
@@ -20,10 +22,15 @@ class ApiClient {
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
 
+    // JWT 토큰 가져오기
+    const token = tokenStorage.getToken();
+
     const config = {
       ...options,
+      credentials: 'omit', // JWT 기반 인증: 쿠키 미사용
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       },
     };
