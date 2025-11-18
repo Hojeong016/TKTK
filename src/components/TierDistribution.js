@@ -5,7 +5,7 @@ import { useFetchItems } from '../api/useFetch';
  * TierDistribution - 멤버들의 티어 분포를 시각화하는 컴포넌트
  */
 export default function TierDistribution() {
-  const { data, isLoading } = useFetchItems();
+  const { data, isLoading } = useFetchItems({ requireAuth: false });
 
   const tierCounts = React.useMemo(() => {
     if (!data || !Array.isArray(data)) return {};

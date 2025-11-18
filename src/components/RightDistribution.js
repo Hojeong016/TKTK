@@ -6,7 +6,7 @@ import { getRightLabel } from '../constants/rights';
  * RightDistribution - 멤버들의 권한(Right) 분포를 시각화하는 컴포넌트
  */
 export default function RightDistribution() {
-  const { data, isLoading } = useFetchItems();
+  const { data, isLoading } = useFetchItems({ requireAuth: false });
 
   const rightCounts = React.useMemo(() => {
     if (!data || !Array.isArray(data)) return {};

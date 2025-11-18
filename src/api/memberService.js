@@ -10,10 +10,10 @@ const memberService = {
    * 모든 멤버 목록 조회
    * @returns {Promise<Member[]>} 멤버 목록
    */
-  async getItems() {
+  async getItems({ auth = false } = {}) {
     try {
       // 서버 API 호출
-     const res = await apiClient.get('/api/members');
+     const res = await apiClient.get('/api/members', { auth });
      return res.data;
     } catch (error) {
       console.error('Failed to fetch members:', error);
@@ -26,9 +26,9 @@ const memberService = {
    * @param {string|number} id - 멤버 ID
    * @returns {Promise<Member>} 멤버 정보
    */
-  async getItemById(id) {
+  async getItemById(id, { auth = true } = {}) {
     try {
-      return await apiClient.get(`/api/members/${id}`);
+      return await apiClient.get(`/api/members/${id}`, { auth });
     } catch (error) {
       console.error(`Failed to fetch member ${id}:`, error);
       throw error;
@@ -100,7 +100,7 @@ const memberService = {
    * @param {string[]} [filters.tiers] - 티어 필터
    * @returns {Promise<Member[]>} 필터링된 멤버 목록
    */
-  async getFilteredItems(filters) {
+  async getFilteredItems(filters, { auth = false } = {}) {
     try {
       const queryParams = new URLSearchParams();
 
@@ -117,7 +117,7 @@ const memberService = {
         ? `/api/members?${queryString}`
         : '/api/members';
 
-      return await apiClient.get(endpoint);
+      return await apiClient.get(endpoint, { auth });
     } catch (error) {
       console.error('Failed to fetch filtered members:', error);
       throw error;

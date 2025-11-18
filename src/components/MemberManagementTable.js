@@ -32,7 +32,7 @@ const toServerTier = (tier) => {
  * 수정/삭제 기능 포함
  */
 export default function MemberManagementTable() {
-  const { data, isLoading, isError } = useFetchItems();
+  const { data, isLoading, isError } = useFetchItems({ requireAuth: true });
   const { rightsConfig } = useStore();
   const [editingId, setEditingId] = React.useState(null);
   const [editData, setEditData] = React.useState({});

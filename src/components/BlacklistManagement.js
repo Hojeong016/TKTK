@@ -14,7 +14,7 @@ import Toast from './Toast';
  * BlacklistManagement - 블랙리스트 및 경고 관리
  */
 export default function BlacklistManagement() {
-  const { data: members, isLoading, isError } = useFetchItems();
+  const { data: members, isLoading, isError } = useFetchItems({ requireAuth: true });
   const {
     data: blacklistEntries,
     isLoading: blacklistLoading,

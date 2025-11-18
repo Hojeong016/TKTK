@@ -5,7 +5,7 @@ import memberService from './memberService';
  * 멤버 목록 조회 훅
  * @returns {QueryResult} React Query 결과
  */
-export function useFetchItems() {
+export function useFetchItems({ requireAuth = false } = {}) {
   return useQuery({
     queryKey: ['items'],
     queryFn: async () => {
@@ -15,11 +15,11 @@ export function useFetchItems() {
 
       // 로컬 데이터 사용 모드
       if (isDevelopment && useLocalData) {
-         return await memberService.getItems();
+         return await memberService.getItems({ auth: requireAuth });
       }
 
       // 서버 API 사용
-      return await memberService.getItems();
+      return await memberService.getItems({ auth: requireAuth });
     },
     staleTime: 1000 * 60, // 1분
   });
@@ -30,11 +30,11 @@ export function useFetchItems() {
  * @param {string|number} id - 멤버 ID
  * @returns {QueryResult} React Query 결과
  */
-export function useFetchItem(id) {
+export function useFetchItem(id, { requireAuth = true } = {}) {
   return useQuery({
     queryKey: ['items', id],
     queryFn: async () => {
-      return await memberService.getItemById(id);
+      return await memberService.getItemById(id, { auth: requireAuth });
     },
     enabled: !!id, // id가 있을 때만 실행
     staleTime: 1000 * 60,
@@ -95,11 +95,11 @@ export function useDeleteItem() {
  * @param {Object} filters - 필터 조건
  * @returns {QueryResult} React Query 결과
  */
-export function useFetchFilteredItems(filters) {
+export function useFetchFilteredItems(filters, { requireAuth = false } = {}) {
   return useQuery({
     queryKey: ['items', 'filtered', filters],
     queryFn: async () => {
-      return await memberService.getFilteredItems(filters);
+      return await memberService.getFilteredItems(filters, { auth: requireAuth });
     },
     staleTime: 1000 * 60,
     enabled: !!filters, // 필터가 있을 때만 실행

@@ -5,7 +5,7 @@ import { useFetchItems } from '../api/useFetch';
 import useStore from '../store/useStore';
 
 export default function MemberList() {
-  const { data, isLoading, isError } = useFetchItems();
+  const { data, isLoading, isError } = useFetchItems({ requireAuth: false });
   const setSelectedItem = useStore((s) => s.setSelectedItem);
   const selectedTags = useStore((s) => s.selectedTags);
 

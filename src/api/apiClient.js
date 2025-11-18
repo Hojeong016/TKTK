@@ -22,16 +22,21 @@ class ApiClient {
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
 
-    // JWT 토큰 가져오기
-    const token = tokenStorage.getToken();
+    const {
+      auth = true,
+      ...fetchOptions
+    } = options;
+
+    // JWT 토큰 가져오기 (필요 시)
+    const token = auth ? tokenStorage.getToken() : null;
 
     const config = {
-      ...options,
+      ...fetchOptions,
       credentials: 'omit', // JWT 기반 인증: 쿠키 미사용
       headers: {
         'Content-Type': 'application/json',
         ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
+        ...fetchOptions.headers,
       },
     };
 
