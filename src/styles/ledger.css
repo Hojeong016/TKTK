@@ -316,7 +316,7 @@
 }
 
 .chart-center-value.expense {
-  background: linear-gradient(135deg, #ce59db, #f5576c);
+  background: linear-gradient(135deg, #ff6b6b, #ff8c42);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
