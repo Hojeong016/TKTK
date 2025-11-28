@@ -14,7 +14,7 @@ export default function Sidebar() {
           <li><NavLink to="/pubg-rank">PUBG Rank</NavLink></li>
           <li><NavLink to="/reports">Reports</NavLink></li>
           <li><NavLink to="/blacklist">Blacklist</NavLink></li>
-          <li><NavLink to="/ledger">공금장부</NavLink></li>
+          <li><NavLink to="/ledger">Fund Ledger</NavLink></li>
           <li><NavLink to="/settings">Settings</NavLink></li>
         </ul>
       </nav>
