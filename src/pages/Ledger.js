@@ -151,7 +151,7 @@ export default function Ledger() {
         {/* 헤더 */}
         <div className="ledger-header">
           <div>
-            <h1 className="ledger-title">💰 Fund Ledger</h1>
+            <h1 className="ledger-title">Fund Ledger</h1>
             <p className="ledger-subtitle">클랜 공금 수입 및 지출 내역</p>
           </div>
         </div>
