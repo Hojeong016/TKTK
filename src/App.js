@@ -6,6 +6,7 @@ import Tier from './pages/Tier';
 import PubgRank from './pages/PubgRank';
 import Reports from './pages/Reports';
 import Blacklist from './pages/Blacklist';
+import Ledger from './pages/Ledger';
 import Settings from './pages/Settings';
 import useStore from './store/useStore';
 
@@ -24,6 +25,7 @@ function App() {
       <Route path="/pubg-rank" element={<PubgRank />} />
       <Route path="/reports" element={<Reports />} />
       <Route path="/blacklist" element={<Blacklist />} />
+      <Route path="/ledger" element={<Ledger />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/*" element={<Home />} />
     </Routes>
