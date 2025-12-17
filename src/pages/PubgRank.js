@@ -1,219 +1,154 @@
 import React from 'react';
 import Layout from '../components/Layout';
-import { TIERS, getTierIcon } from '../constants/tiers';
+import useRankStream from '../hooks/useRankStream';
+import { formatSecondsToClock, formatSecondsToDurationLabel, formatTimestamp } from '../utils/time';
 import '../styles/pubg-rank.css';
 
-// 가상 유저 이름 생성 함수
-const generateMockPlayers = (tier, count = 10) => {
-  const names = [
-    'ShadowHunter', 'DragonSlayer', 'NightRider', 'PhantomStrike', 'ThunderBolt',
-    'IronFist', 'SwiftArrow', 'DarkPhoenix', 'SilentKiller', 'RapidFire',
-    'BlazingGun', 'FrozenBlade', 'StormBreaker', 'CrimsonEdge', 'GoldenEagle',
-    'SteelWolf', 'MysticWarrior', 'VenomSnake', 'TitanForce', 'CosmicRider'
-  ];
+const DEFAULT_COUNT = 20;
 
-  const discordNames = [
-    '치킨러버#1234', '배그왕#5678', '헤드샷마스터#9012', '생존왕#3456', '킬러본능#7890',
-    '전략가#2345', '스나이퍼#6789', '돌격대장#0123', '은신고수#4567', '팀플왕#8901',
-    '배그고인물#1111', '최강전사#2222', '프로게이머#3333', '킬왕#4444', '승률왕#5555',
-    '에임신#6666', '반동제어#7777', '리코일마스터#8888', '치킨딜러#9999', '배그중독#0000'
-  ];
-
-  return Array.from({ length: count }, (_, i) => ({
-    id: `${tier}-${i}`,
-    rank: i + 1,
-    prevRank: i + 1,
-    name: names[i] || `Player${i + 1}`,
-    discordName: discordNames[i] || `유저${i + 1}#0000`,
-    tier: tier,
-    wins: Math.floor(Math.random() * 30) + 10,
-    kills: Math.floor(Math.random() * 150) + 50,
-    kd: (Math.random() * 3 + 1.5).toFixed(1),
-    winRate: Math.floor(Math.random() * 40) + 20,
-    score: Math.floor(Math.random() * 1000) + 500,
-    rankChange: 0 // 초기값
-  }));
+const STREAM_STATUS_LABELS = {
+  idle: '대기 중',
+  connecting: '실시간 연결 중…',
+  open: '실시간 업데이트 연결됨',
+  error: '연결 끊김 - 재시도 중',
+  unsupported: '브라우저에서 SSE를 지원하지 않습니다',
 };
 
 export default function PubgRank() {
-  const [selectedTier, setSelectedTier] = React.useState('all');
-  const [players, setPlayers] = React.useState([]);
+  const count = DEFAULT_COUNT;
 
-  // PUBG 티어 목록
-  const tierList = [
-    { key: 'all', label: '전체' },
-    ...Object.values(TIERS)
-  ];
+  const {
+    rankings,
+    isLoading,
+    isRefreshing,
+    error,
+    lastUpdatedAt,
+    streamStatus,
+  } = useRankStream({ count });
 
-  // 티어별 데이터 생성
-  const topPlayersByTier = React.useMemo(() => ({
-    all: generateMockPlayers('Mixed', 10),
-    bronze: generateMockPlayers('Bronze', 10),
-    silver: generateMockPlayers('Silver', 10),
-    gold: generateMockPlayers('Gold', 10),
-    platinum: generateMockPlayers('Platinum', 10),
-    diamond: generateMockPlayers('Diamond', 10),
-    crown: generateMockPlayers('Crown', 10),
-    ace: generateMockPlayers('Ace', 10),
-    master: generateMockPlayers('Master', 10),
-    challenger: generateMockPlayers('Challenger', 10),
-    conqueror: generateMockPlayers('Conqueror', 10)
-  }), []);
-
-  // 선택된 티어 변경 시 플레이어 업데이트
-  React.useEffect(() => {
-    setPlayers(topPlayersByTier[selectedTier] || []);
-  }, [selectedTier, topPlayersByTier]);
-
-  // 5초마다 순위 섞기
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setPlayers(prev => {
-        // 점수를 랜덤하게 약간 변경
-        const updated = prev.map(p => ({
-          ...p,
-          score: p.score + Math.floor(Math.random() * 200) - 100
-        }));
-
-        // 점수 기준으로 재정렬
-        const sorted = [...updated].sort((a, b) => b.score - a.score);
-
-        // 순위 재할당 (이전 순위 저장)
-        return sorted.map((p, i) => {
-          const newRank = i + 1;
-          const oldRank = p.rank;
-          return {
-            ...p,
-            rank: newRank,
-            rankChange: oldRank - newRank // 양수면 상승, 음수면 하락
-          };
-        });
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const getMedalColor = (rank) => {
-    switch (rank) {
-      case 1: return '#fbbf24';
-      case 2: return '#9ca3af';
-      case 3: return '#cd7f32';
-      default: return '#e5e7eb';
+  const podiumPlayers = React.useMemo(() => {
+    const topThree = rankings.slice(0, 3);
+    while (topThree.length < 3) {
+      topThree.push(null);
     }
-  };
+    return [
+      { podiumClass: 'podium-silver', circleClass: 'circle-silver', rankLabel: '2위', player: topThree[1] },
+      { podiumClass: 'podium-gold', circleClass: 'circle-gold', rankLabel: '1위', player: topThree[0] },
+      { podiumClass: 'podium-bronze', circleClass: 'circle-bronze', rankLabel: '3위', player: topThree[2] },
+    ];
+  }, [rankings]);
 
-  const getMedalEmoji = (rank) => {
-    switch (rank) {
-      case 1: return '🥇';
-      case 2: return '🥈';
-      case 3: return '🥉';
-      default: return `#${rank}`;
-    }
-  };
+  const streamLabel = STREAM_STATUS_LABELS[streamStatus] ?? STREAM_STATUS_LABELS.idle;
+
+  const renderTableBody = () => (
+    <tbody>
+      {rankings.map((entry, index) => {
+        const displayRank = entry.rank ?? index + 1;
+        const key = `${entry.gameCode || entry.memberName || 'rank'}-${index}`;
+        return (
+          <tr key={key}>
+            <td className="col-rank">
+              <span className="rank-badge">#{displayRank}</span>
+            </td>
+            <td className="col-member">
+              <div className="member-name">{entry.memberName || 'Unknown'}</div>
+              <div className="member-sub">{entry.memberRemark || 'PUBG Player'}</div>
+            </td>
+            <td className="col-playtime">
+              <div className="playtime-primary">
+                {formatSecondsToClock(entry.totalPlayTime)}
+              </div>
+              <div className="playtime-secondary">
+                {formatSecondsToDurationLabel(entry.totalPlayTime)}
+              </div>
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  );
 
   return (
     <Layout>
       <div className="pubg-rank-page">
-        <div className="tier-header">
-          <h1 className="tier-title">PUBG Rank</h1>
-          <p className="tier-subtitle">PUBG 티어별 상위 랭킹</p>
-        </div>
-
-        <div className="tier-instruction">
-          💡 탭을 클릭해서 각 티어별 상위 랭킹을 확인하세요
-        </div>
-
-        {/* PUBG 티어 탭 */}
-        <div className="tier-tabs">
-          {tierList.map((tier) => (
-            <button
-              key={tier.key}
-              className={`tier-tab ${selectedTier === tier.key ? 'active' : ''}`}
-              onClick={() => setSelectedTier(tier.key)}
-              title={tier.label}
-            >
-              {tier.key === 'all' ? (
-                <span className="tier-tab-all-icon">⭐</span>
-              ) : (
-                getTierIcon(tier.label, { className: 'tier-icon-tab' })
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* 상위 랭킹 리스트 */}
-        <div className="rank-content">
-          <div className="top-performers">
-            <h3 className="top-performers-title">
-              {selectedTier !== 'all' && (
-                <span className="title-tier-icon">
-                  {getTierIcon(tierList.find(t => t.key === selectedTier)?.label, { className: 'tier-icon-title' })}
-                </span>
-              )}
-              {selectedTier === 'all' ? 'ALL' : tierList.find(t => t.key === selectedTier)?.label} RANK
-            </h3>
-
-            {players.length > 0 ? (
-              <div className="performers-list">
-                {players.map((player) => (
-                  <div
-                    key={player.id}
-                    className="performer-item"
-                    style={{
-                      transitionDelay: `${player.rank * 30}ms`
-                    }}
-                  >
-                    <div className="performer-rank-badge" style={{ backgroundColor: getMedalColor(player.rank) }}>
-                      {getMedalEmoji(player.rank)}
-                    </div>
-
-                    <div className="performer-info">
-                      <div className="performer-name-row">
-                        <span className="performer-name">{player.name}</span>
-                        {player.rankChange !== undefined && (
-                          <span className={`rank-change-inline ${
-                            player.rankChange > 0 ? 'rank-up' :
-                            player.rankChange < 0 ? 'rank-down' :
-                            'rank-same'
-                          }`}>
-                            {player.rankChange > 0 ? `▲${Math.abs(player.rankChange)}` :
-                             player.rankChange < 0 ? `▼${Math.abs(player.rankChange)}` :
-                             '—'}
-                          </span>
-                        )}
-                  
-                      </div>
-                      <div className="performer-tier">{player.discordName}</div>
-                    </div>
-
-                    <div className="performer-stats">
-                      <div className="performer-stat">
-                        <span className="performer-stat-label">승리</span>
-                        <span className="performer-stat-value">{player.wins}</span>
-                      </div>
-                      <div className="performer-stat">
-                        <span className="performer-stat-label">킬</span>
-                        <span className="performer-stat-value">{player.kills}</span>
-                      </div>
-                      <div className="performer-stat">
-                        <span className="performer-stat-label">K/D</span>
-                        <span className="performer-stat-value">{player.kd}</span>
-                      </div>
-                      <div className="performer-stat">
-                        <span className="performer-stat-label">승률</span>
-                        <span className="performer-stat-value">{player.winRate}%</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <p>해당 티어에 랭킹 데이터가 없습니다.</p>
-              </div>
-            )}
+        <div className="rank-header">
+          <div className="rank-intro">
+            <h1 className="rank-title">PUBG 실시간 랭킹</h1>
           </div>
+        </div>
+
+        <div className="vanguard-card">
+          <div className="rank-podium-wrapper">
+            {podiumPlayers.map(({ podiumClass, circleClass, rankLabel, player }) => (
+              <div className={`podium ${podiumClass}`} key={podiumClass}>
+                <div className={`circle ${circleClass}`}>
+                  <span className="circle-name">
+                    {player?.memberName || '선발대 대기 중'}
+                  </span>
+                </div>
+                <div className="podium-rank-label">{rankLabel}</div>
+              </div>
+            ))}
+          </div>
+          <div className="stream-status-inline">
+            <span className={`stream-indicator stream-${streamStatus}`} aria-label={streamLabel} />
+            <span className="stream-status-inline-text">{streamLabel}</span>
+            <span className="stream-status-inline-divider">·</span>
+            <span className="stream-updated-inline">
+              {lastUpdatedAt ? `마지막 스냅샷 ${formatTimestamp(lastUpdatedAt)}` : '스냅샷을 불러오는 중…'}
+            </span>
+          </div>
+        </div>
+
+        {isRefreshing && (
+          <div className="stream-refresh-inline">데이터 갱신 중…</div>
+        )}
+
+        {error && (
+          <div className="error-banner">
+            <p>데이터를 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.</p>
+            <pre>{error.message}</pre>
+          </div>
+        )}
+
+        <div className="rank-table-card">
+          {isLoading ? (
+            <div className="loading-state">
+              <span className="loading-spinner" />
+              <p>랭킹 데이터를 불러오는 중입니다…</p>
+            </div>
+          ) : rankings.length === 0 ? (
+            <div className="empty-state">
+              <p>표시할 랭킹 데이터가 없습니다.</p>
+              <p>서버에 새로운 데이터가 들어오면 자동으로 채워집니다.</p>
+            </div>
+          ) : (
+            <table className="rank-table">
+              <thead>
+                <tr>
+                  <th className="col-rank">순위</th>
+                  <th className="col-member">멤버</th>
+                  <th className="col-playtime">누적 플레이 타임</th>
+                </tr>
+              </thead>
+              {renderTableBody()}
+            </table>
+          )}
+        </div>
+
+        <div className="rank-guideline">
+          <h3>🕒 랭킹 반영 안내</h3>
+          <ul>
+            <li><strong>오늘 처음 가입하셨나요?</strong>
+      게임 시간이 랭킹에 반영되기까지 약 <strong>10분 ~ 최대 1시간</strong> 정도 걸릴 수 있어요.</li>
+
+  <li>매치 결과가 서버에 업데이트되면
+      랭킹은 보통 <strong>1~5분 내로 자동 반영</strong>됩니다.</li>
+
+  <li>랭킹 기록은 <strong>가입일 이후 플레이한 매치부터</strong> 누적됩니다.</li>
+
+  <li>⚠️ <strong>매치 종료 전에 나간 게임은</strong> 정상적인 플레이로 인정되지 않아 누적 시간에 포함되지 않습니다.</li>
+          </ul>
         </div>
       </div>
     </Layout>
