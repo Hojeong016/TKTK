@@ -93,7 +93,7 @@ export default function AddMemberModal({ isOpen, onClose }) {
         },
         discord: {
           right: formData.rights,
-          discordTierId: null, // 서버에서 처리
+          discordTier: null,
           join: new Date().toISOString()
         },
         game: {

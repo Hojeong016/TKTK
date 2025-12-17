@@ -65,7 +65,6 @@ export default function MemberManagementTable() {
     const normalizedTier = normalizeTier(member.game?.tier);
 
     setEditData({
-      name: member.name || '',
       discordname: member.info?.discordname || '',
       birthday: birthdayValue,
       rights: rights,
@@ -73,7 +72,8 @@ export default function MemberManagementTable() {
       tier: normalizedTier,
       soopUrl: soopUrl,
       chzzkUrl: chzzkUrl,
-      staffName: member.memberofthestaff?.name || ''
+      staffName: member.memberofthestaff?.name || '',
+      tktkTier: member.tktkTier || ''
     });
 
     // 디버깅을 위한 로그
@@ -100,8 +100,6 @@ export default function MemberManagementTable() {
   const handleSave = (memberId) => {
     // 수정된 데이터를 서버 DTO 형식으로 변환
     const updatedMemberData = {
-      id: memberId,
-      name: editData.name,
       info: {
         discordname: editData.discordname,
         birthday: editData.birthday
@@ -119,7 +117,8 @@ export default function MemberManagementTable() {
       },
       memberofthestaff: {
         name: editData.staffName
-      }
+      },
+      tktkTier: editData.tktkTier || null
     };
 
     // API 호출
@@ -224,6 +223,7 @@ export default function MemberManagementTable() {
               <th>권한</th>
               <th>게임명</th>
               <th>티어</th>
+              <th>TKTK 티어</th>
               <th>Soop</th>
               <th>Chzzk</th>
               <th>담당 스태프</th>
@@ -314,16 +314,7 @@ export default function MemberManagementTable() {
 
                   {/* Name */}
                   <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editData.name || ''}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        className="table-input"
-                      />
-                    ) : (
-                      member.name || '—'
-                    )}
+                    {member.name || '—'}
                   </td>
 
                   {/* Discord 닉네임 */}
@@ -435,6 +426,11 @@ export default function MemberManagementTable() {
                         <span>{member.game?.tier || 'Unranked'}</span>
                       </div>
                     )}
+                  </td>
+
+                  {/* TKTK 티어 */}
+                  <td>
+                    {member.tktkTier || '—'}
                   </td>
 
                   {/* Soop URL */}
