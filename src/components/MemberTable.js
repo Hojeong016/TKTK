@@ -49,7 +49,7 @@ export default function MemberTable({ data = [], onSelect }) {
                 <td data-label="Game">
                   <div className="td-game">
                     {getTierIcon(m.game?.tier, { className: 'tier-icon-img tiny', title: m.game?.tier })}
-                    <span className="td-game-text">{m.game?.tier ?? 'Free'}</span>
+                    <span className="td-game-text">{m.game?.tier ?? 'UNRAN'}</span>
                   </div>
                 </td>
                 <td data-label="Discord">

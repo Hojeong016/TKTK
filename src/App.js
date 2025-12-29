@@ -8,6 +8,9 @@ import Reports from './pages/Reports';
 import Blacklist from './pages/Blacklist';
 import Ledger from './pages/Ledger';
 import Settings from './pages/Settings';
+import DiscordCallback from './pages/DiscordCallback';
+import SignupComplete from './pages/SignupComplete';
+import Profile from './pages/Profile';
 import useStore from './store/useStore';
 
 function App() {
@@ -27,6 +30,9 @@ function App() {
       <Route path="/blacklist" element={<Blacklist />} />
       <Route path="/ledger" element={<Ledger />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/auth/callback" element={<DiscordCallback />} />
+      <Route path="/signup/complete" element={<SignupComplete />} />
+      <Route path="/profile" element={<Profile />} />
       <Route path="/*" element={<Home />} />
     </Routes>
   );
