@@ -36,7 +36,14 @@ const useStore = create((set, get) => ({
       set({ rightsConfig: data || [], status: STATUS.SUCCESS });
     } catch (error) {
       console.error('Failed to load rights config:', error);
-      set({ status: STATUS.ERROR });
+      // 에러가 발생해도 기본 설정으로 계속 진행
+      set({
+        rightsConfig: [
+          { key: 'member', label: 'Member', color: '#3b82f6', bgColor: '#dbeafe' },
+          { key: 'admin', label: 'Admin', color: '#8b5cf6', bgColor: '#ede9fe' }
+        ],
+        status: STATUS.ERROR
+      });
     }
   },
   getRightConfig: (key) => {

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/components.css';
 import useStore from '../store/useStore';
-import { initiateDiscordLogin, logout, getUser, isAuthenticated } from '../utils/discord-auth';
+import { initiateDiscordLogin, logout, getUser, isAuthenticated, isAdmin, getRoleFromToken } from '../utils/discord-auth';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -15,7 +15,12 @@ export default function Header() {
   useEffect(() => {
     // 로그인 상태 확인
     if (isAuthenticated()) {
-      setUser(getUser());
+      const currentUser = getUser();
+      setUser(currentUser);
+      const role = getRoleFromToken();
+      console.log('Current user:', currentUser);
+      console.log('JWT Role:', role);
+      console.log('Is admin?', isAdmin());
     }
   }, []);
 
@@ -85,7 +90,21 @@ export default function Header() {
             {showUserMenu && (
               <div className="user-dropdown-menu">
                 <div className="user-info">
-                  <div className="user-name">{user.name}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div className="user-name">{user.name}</div>
+                    {isAdmin() && (
+                      <span style={{
+                        fontSize: '0.7rem',
+                        padding: '0.15rem 0.5rem',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        borderRadius: '12px',
+                        fontWeight: 600
+                      }}>
+                        ADMIN
+                      </span>
+                    )}
+                  </div>
                   {user.info?.koreaname && <div className="user-email">{user.info.koreaname}</div>}
                 </div>
                 <div className="menu-divider" />

@@ -152,6 +152,65 @@ const memberService = {
       console.error(`Failed to retry game sync for ${gameName}:`, error);
       throw error;
     }
+  },
+
+  /**
+   * 클랜 가입 신청 (내 상태 변경)
+   * @returns {Promise<any>} 응답 데이터
+   */
+  async requestClanJoin() {
+    try {
+      const res = await apiClient.put('/api/members/me/clan-status');
+      return res.data;
+    } catch (error) {
+      console.error('Failed to request clan join:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 클랜 가입 승인
+   * @param {string|number} id - 멤버 ID
+   * @returns {Promise<any>} 응답 데이터
+   */
+  async approveClanJoin(id) {
+    try {
+      const res = await apiClient.put(`/api/members/${id}/approve`);
+      return res.data;
+    } catch (error) {
+      console.error(`Failed to approve clan join for member ${id}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * 클랜 가입 거절
+   * @param {string|number} id - 멤버 ID
+   * @returns {Promise<any>} 응답 데이터
+   */
+  async rejectClanJoin(id) {
+    try {
+      const res = await apiClient.put(`/api/members/${id}/reject`);
+      return res.data;
+    } catch (error) {
+      console.error(`Failed to reject clan join for member ${id}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * 클랜원 해제
+   * @param {string|number} id - 멤버 ID
+   * @returns {Promise<any>} 응답 데이터
+   */
+  async removeClanMember(id) {
+    try {
+      const res = await apiClient.put(`/api/members/${id}/remove`);
+      return res.data;
+    } catch (error) {
+      console.error(`Failed to remove clan member ${id}:`, error);
+      throw error;
+    }
   }
 };
 

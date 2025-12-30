@@ -67,7 +67,7 @@ export default function MemberCard({ member, onSelect }) {
         <div className="member-header">
           <div className="member-name-block">
             <div className="member-name">{gamename}</div>
-            <div className="member-sub">{discordName} · {displayName}</div>
+            <div className="member-sub">{member.name} · {discordName}</div>
             <div className="member-badges">
               {rights.map((rightKey, index) => {
                 const config = rightsConfig.find(rc => rc.key === rightKey);

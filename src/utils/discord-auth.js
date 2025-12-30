@@ -78,6 +78,11 @@ export const logout = () => {
   localStorage.removeItem('discord_access_token');
   localStorage.removeItem('discord_refresh_token');
   localStorage.removeItem('discord_user');
+  localStorage.removeItem('discord_signup_token');
+
+  // 기존 관리자 로그인 토큰도 제거
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('refreshToken');
 };
 
 /**
@@ -121,4 +126,56 @@ export const setSignupToken = (token) => {
  */
 export const removeSignupToken = () => {
   localStorage.removeItem('discord_signup_token');
+};
+
+/**
+ * JWT 토큰 디코딩 (payload만 추출, 검증은 백엔드에서)
+ * @param {string} token - JWT 토큰
+ * @returns {Object|null} 디코딩된 payload
+ */
+const decodeJWT = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('JWT decode error:', error);
+    return null;
+  }
+};
+
+/**
+ * JWT 토큰에서 role 가져오기
+ * @returns {string|null}
+ */
+export const getRoleFromToken = () => {
+  const token = getAccessToken();
+  if (!token) return null;
+
+  const payload = decodeJWT(token);
+  return payload?.role || null;
+};
+
+/**
+ * 사용자 권한 확인
+ * @param {string} permission - 확인할 권한 (예: 'ADMIN', 'MEMBER')
+ * @returns {boolean}
+ */
+export const hasPermission = (permission) => {
+  const role = getRoleFromToken();
+  return role === permission;
+};
+
+/**
+ * 관리자 권한 확인
+ * @returns {boolean}
+ */
+export const isAdmin = () => {
+  return hasPermission('ADMIN');
 };

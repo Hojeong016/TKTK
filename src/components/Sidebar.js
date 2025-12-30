@@ -1,10 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import useStore from '../store/useStore';
+import { isAdmin, isAuthenticated } from '../utils/discord-auth';
 import '../styles/components.css';
 
 export default function Sidebar() {
   const showSidebar = useStore((s) => s.showSidebar);
+  const userIsAdmin = isAuthenticated() && isAdmin();
+
   return (
     <aside className={`sidebar ${showSidebar ? 'open' : ''}`} aria-label="Sidebar">
       <nav>
@@ -15,7 +18,7 @@ export default function Sidebar() {
           <li><NavLink to="/reports">Reports</NavLink></li>
           <li><NavLink to="/blacklist">Blacklist</NavLink></li>
           <li><NavLink to="/ledger">Fund Ledger</NavLink></li>
-          <li><NavLink to="/settings">Settings</NavLink></li>
+          {userIsAdmin && <li><NavLink to="/settings">Settings</NavLink></li>}
         </ul>
       </nav>
     </aside>

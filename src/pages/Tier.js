@@ -37,7 +37,7 @@ const mapMemberToLevel = (member) => {
 const formatMemberLabel = (member) => {
   const baseName = member.discordname || member.gamename || member.name;
   if (!baseName) return '이름 미상';
-  return member.pubgTier ? `${member.discordname } (${member.gamename})` : baseName;
+  return member.pubgTier ? `${member.name} (${member.gamename} / ${member.discordname})` : baseName;
 };
 
 export default function Tier() {

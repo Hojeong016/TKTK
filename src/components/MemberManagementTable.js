@@ -28,6 +28,18 @@ const toServerTier = (tier) => {
 };
 
 /**
+ * TKTK 티어 레벨 코드를 한글로 변환
+ */
+const getLevelCodeLabel = (levelCode) => {
+  const levelMap = {
+    'UPPER': '상',
+    'MID': '중',
+    'LOW': '하'
+  };
+  return levelMap[levelCode] || levelCode;
+};
+
+/**
  * MemberManagementTable - 관리자용 멤버 관리 테이블
  * 수정/삭제 기능 포함
  */
@@ -192,9 +204,19 @@ export default function MemberManagementTable() {
     }));
   };
 
+  const getClanStatusBadge = (status) => {
+    const statusConfig = {
+      APPROVED: { text: '클랜원', color: '#10b981', bg: '#d1fae5' },
+      PENDING: { text: '신청 중', color: '#f59e0b', bg: '#fef3c7' },
+      NONE: { text: '미가입', color: '#6b7280', bg: '#f3f4f6' }
+    };
+    return statusConfig[status] || statusConfig.NONE;
+  };
+
   return (
     <div className="management-table-container">
-      <div className="table-controls">
+      {/* 새 멤버 추가 기능 주석처리 */}
+      {/* <div className="table-controls">
         <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
           + 새 멤버 추가
         </button>
@@ -203,7 +225,7 @@ export default function MemberManagementTable() {
       <AddMemberModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-      />
+      /> */}
 
       {isLoading ? (
         <div>Loading...</div>
@@ -224,6 +246,7 @@ export default function MemberManagementTable() {
               <th>게임명</th>
               <th>티어</th>
               <th>TKTK 티어</th>
+              <th>클랜 상태</th>
               <th>Soop</th>
               <th>Chzzk</th>
               <th>담당 스태프</th>
@@ -430,7 +453,36 @@ export default function MemberManagementTable() {
 
                   {/* TKTK 티어 */}
                   <td>
-                    {member.tktkTier || '—'}
+                    {member.tier?.tktkTierName ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <span style={{ fontWeight: 600 }}>{member.tier.tktkTierName}</span>
+                        {member.tier.tktkTierLevelCode && (
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            {getLevelCodeLabel(member.tier.tktkTierLevelCode)}
+                          </span>
+                        )}
+                      </div>
+                    ) : '—'}
+                  </td>
+
+                  {/* 클랜 상태 */}
+                  <td>
+                    {(() => {
+                      const clanStatus = member.clanJoinStatus || 'NONE';
+                      const statusBadge = getClanStatusBadge(clanStatus);
+
+                      return (
+                        <span
+                          className="right-badge-small"
+                          style={{
+                            color: statusBadge.color,
+                            backgroundColor: statusBadge.bg
+                          }}
+                        >
+                          {statusBadge.text}
+                        </span>
+                      );
+                    })()}
                   </td>
 
                   {/* Soop URL */}
@@ -505,6 +557,7 @@ export default function MemberManagementTable() {
         onConfirm={confirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />
+
       <Toast open={!!toast} message={toast?.message} type={toast?.type || 'success'} />
     </div>
   );

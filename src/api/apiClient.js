@@ -1,4 +1,5 @@
 import tokenStorage from '../utils/tokenStorage';
+import { logout } from '../utils/discord-auth';
 
 /**
  * API 클라이언트 클래스
@@ -48,6 +49,27 @@ class ApiClient {
     try {
       const response = await fetch(url, config);
       clearTimeout(timeoutId);
+
+      // 401 Unauthorized 에러 처리
+      if (response.status === 401) {
+        console.warn('토큰이 만료되었거나 인증에 실패했습니다.');
+
+        // 이미 처리 중인지 확인 (중복 처리 방지)
+        if (!sessionStorage.getItem('auth_error_handling')) {
+          sessionStorage.setItem('auth_error_handling', 'true');
+
+          // 토큰 삭제
+          logout();
+
+          // 401 에러 플래그 설정
+          sessionStorage.setItem('auth_expired', 'true');
+
+          // 홈 페이지로 리다이렉트
+          window.location.href = '/';
+        }
+
+        throw new Error('로그인이 만료되었습니다. 다시 로그인해주세요.');
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

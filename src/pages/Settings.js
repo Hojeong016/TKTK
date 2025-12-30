@@ -1,80 +1,42 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import MemberManagementTable from '../components/MemberManagementTable';
 import RightsManagement from '../components/RightsManagement';
 import TierManagement from '../components/TierManagement';
 import BlacklistManagement from '../components/BlacklistManagement';
-import Login from '../components/Login';
-import Signup from '../components/Signup';
-import authService from '../api/authService';
+import ClanStatusManagement from '../components/ClanStatusManagement';
+import { isAuthenticated, isAdmin } from '../utils/discord-auth';
+import useStore from '../store/useStore';
 import '../styles/settings.css';
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = React.useState('members'); // 'members', 'rights', 'tier', or 'blacklist'
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const [authMode, setAuthMode] = React.useState('login'); // 'login' or 'signup'
-  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
+  const [activeTab, setActiveTab] = React.useState('members'); // 'members', 'rights', 'tier', 'clan', or 'blacklist'
+  const navigate = useNavigate();
+  const loadRightsConfig = useStore(state => state.loadRightsConfig);
 
-  // 인증 체크
+  // 권한 체크
   React.useEffect(() => {
-    const checkAuth = () => {
-      setIsCheckingAuth(true);
-      const authenticated = authService.isAuthenticated();
-      setIsAuthenticated(authenticated);
-      setIsCheckingAuth(false);
-    };
-
-    checkAuth();
-  }, []);
-
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
-  };
-
-  const handleSignupSuccess = () => {
-    // 회원가입 성공 후 로그인 화면으로 전환
-    setAuthMode('login');
-  };
-
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-      setIsAuthenticated(false);
-    } catch (error) {
-      console.error('Logout error:', error);
-      // 에러가 나도 일단 로그아웃 처리
-      setIsAuthenticated(false);
+    if (!isAuthenticated()) {
+      // 로그인하지 않은 경우 홈으로 리다이렉트
+      navigate('/');
+      return;
     }
-  };
 
-  // 인증 체크 중
-  if (isCheckingAuth) {
-    return (
-      <Layout>
-        <div style={{ padding: '50px', textAlign: 'center' }}>
-          <p>로딩 중...</p>
-        </div>
-      </Layout>
-    );
-  }
+    if (!isAdmin()) {
+      // 관리자가 아닌 경우 홈으로 리다이렉트
+      alert('관리자 권한이 필요합니다.');
+      navigate('/');
+      return;
+    }
 
-  // 인증되지 않은 경우 로그인/회원가입 화면 표시
-  if (!isAuthenticated) {
-    return (
-      <Layout>
-        {authMode === 'login' ? (
-          <Login
-            onLoginSuccess={handleLoginSuccess}
-            onSwitchToSignup={() => setAuthMode('signup')}
-          />
-        ) : (
-          <Signup
-            onSignupSuccess={handleSignupSuccess}
-            onSwitchToLogin={() => setAuthMode('login')}
-          />
-        )}
-      </Layout>
-    );
+    // 관리자인 경우에만 권한 설정 로드
+    loadRightsConfig();
+  }, [navigate, loadRightsConfig]);
+
+  // 관리자가 아니면 아무것도 렌더링하지 않음
+  if (!isAuthenticated() || !isAdmin()) {
+    return null;
   }
 
   return (
@@ -85,9 +47,6 @@ export default function Settings() {
             <h1 className="settings-title">Settings</h1>
             <p className="settings-subtitle">관리자 설정 패널</p>
           </div>
-          <button className="logout-button" onClick={handleLogout}>
-            로그아웃
-          </button>
         </div>
 
         {/* Tabs */}
@@ -99,16 +58,22 @@ export default function Settings() {
             멤버 관리
           </button>
           <button
-            className={`settings-tab ${activeTab === 'rights' ? 'active' : ''}`}
-            onClick={() => setActiveTab('rights')}
+            className={`settings-tab ${activeTab === 'clan' ? 'active' : ''}`}
+            onClick={() => setActiveTab('clan')}
           >
-            권한 관리
+            클랜 가입 관리
           </button>
           <button
             className={`settings-tab ${activeTab === 'tier' ? 'active' : ''}`}
             onClick={() => setActiveTab('tier')}
           >
-            TKTK CLAN TIER
+            클랜 정보 관리
+          </button>
+          <button
+            className={`settings-tab ${activeTab === 'rights' ? 'active' : ''}`}
+            onClick={() => setActiveTab('rights')}
+          >
+            권한 관리
           </button>
           <button
             className={`settings-tab ${activeTab === 'blacklist' ? 'active' : ''}`}
@@ -121,6 +86,7 @@ export default function Settings() {
         {/* Tab Content */}
         <div className="settings-tab-content">
           {activeTab === 'members' && <MemberManagementTable />}
+          {activeTab === 'clan' && <ClanStatusManagement />}
           {activeTab === 'rights' && <RightsManagement />}
           {activeTab === 'tier' && <TierManagement />}
           {activeTab === 'blacklist' && <BlacklistManagement />}
