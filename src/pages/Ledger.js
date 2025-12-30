@@ -295,8 +295,9 @@ export default function Ledger() {
         </div>
 
         {/* 차트 섹션 */}
-        {incomeChartData.length > 0 && expenseChartData.length > 0 && (
+        {(incomeChartData.length > 0 || expenseChartData.length > 0) && (
           <div className="charts-section">
+            {incomeChartData.length > 0 && (
             <div className="chart-card">
               <h3 className="chart-title">📊 수입 상세</h3>
               <div className="chart-container-modern">
@@ -359,7 +360,9 @@ export default function Ledger() {
                 ))}
               </div>
             </div>
+            )}
 
+            {expenseChartData.length > 0 && (
             <div className="chart-card">
               <h3 className="chart-title">📊 지출 상세</h3>
               <div className="chart-container-modern">
@@ -422,6 +425,7 @@ export default function Ledger() {
                 ))}
               </div>
             </div>
+            )}
           </div>
         )}
 

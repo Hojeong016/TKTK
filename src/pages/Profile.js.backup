@@ -13,6 +13,7 @@ import {
   activitySummary,
   overallStats,
   recentMatches,
+  statsByMode,
   mapStats,
   weaponStats
 } from '../data/dummyGameStats';
@@ -35,7 +36,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isJoining, setIsJoining] = useState(false);
-  const [activeTab, setActiveTab] = useState('basic'); // 'basic' or 'stats'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'stats', 'matches', 'seasons', 'achievements'
 
   // 게임 통계 더미 데이터
   const [activityData] = useState(generateActivityData());
@@ -202,6 +203,13 @@ export default function Profile() {
   const syncStatus = getSyncStatusInfo(user.game?.syncStatus);
   const clanStatus = getClanStatusInfo(user.clanJoinStatus);
 
+  // 탭 정의
+  const tabs = [
+    { id: 'overview', label: '개요', icon: '📊' },
+    { id: 'basic', label: '기본정보', icon: '👤' },
+    { id: 'matches', label: '매치이력', icon: '🎯' }
+  ];
+
   return (
     <Layout>
       <div style={{
@@ -214,64 +222,213 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 style={{
-            fontSize: '2rem',
-            fontWeight: 700,
-            marginBottom: '1.5rem',
-            color: '#1e293b'
+          {/* Header with Profile Info */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.5rem',
+            marginBottom: '2rem',
+            padding: '1.5rem',
+            background: 'white',
+            borderRadius: '16px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #e5e7eb'
           }}>
-            My Profile
-          </h1>
+            {user.info?.avatar ? (
+              <img
+                src={user.info.avatar}
+                alt={user.name}
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  border: '3px solid #e5e7eb'
+                }}
+              />
+            ) : (
+              <div style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '2rem',
+                color: 'white',
+                fontWeight: 700
+              }}>
+                {user.name?.[0]?.toUpperCase() || 'U'}
+              </div>
+            )}
+            <div style={{ flex: 1 }}>
+              <h1 style={{
+                fontSize: '1.75rem',
+                fontWeight: 700,
+                marginBottom: '0.25rem',
+                color: '#1e293b'
+              }}>
+                {user.name}
+              </h1>
+              {user.info?.koreaname && (
+                <p style={{ color: '#64748b', fontSize: '1rem', margin: 0 }}>
+                  {user.info.koreaname}
+                </p>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>티어</div>
+                <div style={{
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  color: getTierColor(user.game?.tier)
+                }}>
+                  {user.game?.tier || 'UNRANKED'}
+                </div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>K/D</div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#10b981' }}>
+                  {gameStats.kd.toFixed(2)}
+                </div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>승률</div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#fbbf24' }}>
+                  {gameStats.winRate.toFixed(1)}%
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Tab Navigation */}
           <div style={{
             display: 'flex',
             gap: '0.5rem',
             marginBottom: '2rem',
-            borderBottom: '2px solid #e5e7eb'
+            borderBottom: '2px solid #e5e7eb',
+            overflowX: 'auto'
           }}>
-            <button
-              onClick={() => setActiveTab('basic')}
-              style={{
-                padding: '0.75rem 1.5rem',
-                background: 'transparent',
-                color: activeTab === 'basic' ? '#667eea' : '#6b7280',
-                border: 'none',
-                borderBottom: activeTab === 'basic' ? '2px solid #667eea' : '2px solid transparent',
-                marginBottom: '-2px',
-                fontSize: '0.875rem',
-                fontWeight: activeTab === 'basic' ? 600 : 500,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                letterSpacing: '0.3px'
-              }}
-            >
-              기본 정보
-            </button>
-            <button
-              onClick={() => setActiveTab('stats')}
-              style={{
-                padding: '0.75rem 1.5rem',
-                background: 'transparent',
-                color: activeTab === 'stats' ? '#667eea' : '#6b7280',
-                border: 'none',
-                borderBottom: activeTab === 'stats' ? '2px solid #667eea' : '2px solid transparent',
-                marginBottom: '-2px',
-                fontSize: '0.875rem',
-                fontWeight: activeTab === 'stats' ? 600 : 500,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                letterSpacing: '0.3px'
-              }}
-            >
-              게임 통계
-            </button>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  background: activeTab === tab.id ? 'white' : 'transparent',
+                  color: activeTab === tab.id ? '#667eea' : '#6b7280',
+                  border: 'none',
+                  borderBottom: activeTab === tab.id ? '2px solid #667eea' : '2px solid transparent',
+                  marginBottom: '-2px',
+                  fontSize: '0.875rem',
+                  fontWeight: activeTab === tab.id ? 700 : 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  whiteSpace: 'nowrap'
+                }}
+                onMouseEnter={(e) => {
+                  if (activeTab !== tab.id) {
+                    e.target.style.color = '#1e293b';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeTab !== tab.id) {
+                    e.target.style.color = '#6b7280';
+                  }
+                }}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
 
           {/* Tab Content */}
+          {activeTab === 'overview' && (
+            <div>
+              {/* Activity Heatmap */}
+              <ActivityHeatmap data={activityData} summary={activitySummary} />
+
+              {/* Main Stats Cards */}
+              <GameStatsCards stats={gameStats} />
+
+              {/* Recent Matches */}
+              <MatchTimeline matches={recentMatches} limit={5} />
+
+              {/* Quick Stats Grid */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '1rem',
+                marginTop: '1.5rem'
+              }}>
+                {/* 선호 맵 */}
+                <div style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
+                    선호 맵
+                  </h4>
+                  {mapStats.slice(0, 3).map((map) => (
+                    <div key={map.name} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '0.5rem 0',
+                      borderBottom: '1px solid #f3f4f6'
+                    }}>
+                      <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: 500 }}>
+                        {map.name}
+                      </span>
+                      <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                        {map.matches}경기
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 자주 쓰는 무기 */}
+                <div style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
+                    자주 쓰는 무기
+                  </h4>
+                  {weaponStats.slice(0, 3).map((weapon) => (
+                    <div key={weapon.name} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '0.5rem 0',
+                      borderBottom: '1px solid #f3f4f6'
+                    }}>
+                      <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: 500 }}>
+                        {weapon.name}
+                      </span>
+                      <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                        {weapon.kills}킬
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'basic' && (
             <div>
-              {/* 기본 정보 카드 */}
+
+          {/* 기본 정보 카드 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -608,86 +765,6 @@ export default function Profile() {
               <StreamingLink label="치지직" url={user.streaming?.chzzk} />
             </div>
           </motion.div>
-            </div>
-          )}
-
-          {/* Stats Tab */}
-          {activeTab === 'stats' && (
-            <div>
-              {/* Activity Heatmap */}
-              <ActivityHeatmap data={activityData} summary={activitySummary} />
-
-              {/* Main Stats Cards */}
-              <GameStatsCards stats={gameStats} />
-
-              {/* Recent Matches */}
-              <MatchTimeline matches={recentMatches} limit={5} />
-
-              {/* Quick Stats Grid */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: '1rem',
-                marginTop: '1.5rem'
-              }}>
-                {/* 선호 맵 */}
-                <div style={{
-                  background: 'white',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                  border: '1px solid #e5e7eb'
-                }}>
-                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
-                    선호 맵
-                  </h4>
-                  {mapStats.slice(0, 3).map((map) => (
-                    <div key={map.name} style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: '0.5rem 0',
-                      borderBottom: '1px solid #f3f4f6'
-                    }}>
-                      <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: 500 }}>
-                        {map.name}
-                      </span>
-                      <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                        {map.matches}경기
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* 자주 쓰는 무기 */}
-                <div style={{
-                  background: 'white',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                  border: '1px solid #e5e7eb'
-                }}>
-                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
-                    자주 쓰는 무기
-                  </h4>
-                  {weaponStats.slice(0, 3).map((weapon) => (
-                    <div key={weapon.name} style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: '0.5rem 0',
-                      borderBottom: '1px solid #f3f4f6'
-                    }}>
-                      <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: 500 }}>
-                        {weapon.name}
-                      </span>
-                      <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                        {weapon.kills}킬
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
         </motion.div>
       </div>
     </Layout>
