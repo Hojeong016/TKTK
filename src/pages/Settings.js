@@ -6,12 +6,13 @@ import RightsManagement from '../components/RightsManagement';
 import TierManagement from '../components/TierManagement';
 import BlacklistManagement from '../components/BlacklistManagement';
 import ClanStatusManagement from '../components/ClanStatusManagement';
+import LedgerManagement from '../components/LedgerManagement';
 import { isAuthenticated, isAdmin } from '../utils/discord-auth';
 import useStore from '../store/useStore';
 import '../styles/settings.css';
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = React.useState('members'); // 'members', 'rights', 'tier', 'clan', or 'blacklist'
+  const [activeTab, setActiveTab] = React.useState('members'); // 'members', 'clan', 'rights', 'tier', 'ledger', or 'blacklist'
   const navigate = useNavigate();
   const loadRightsConfig = useStore(state => state.loadRightsConfig);
 
@@ -70,6 +71,12 @@ export default function Settings() {
             클랜 정보 관리
           </button>
           <button
+            className={`settings-tab ${activeTab === 'ledger' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ledger')}
+          >
+            공금 관리
+          </button>
+          <button
             className={`settings-tab ${activeTab === 'rights' ? 'active' : ''}`}
             onClick={() => setActiveTab('rights')}
           >
@@ -87,8 +94,9 @@ export default function Settings() {
         <div className="settings-tab-content">
           {activeTab === 'members' && <MemberManagementTable />}
           {activeTab === 'clan' && <ClanStatusManagement />}
-          {activeTab === 'rights' && <RightsManagement />}
           {activeTab === 'tier' && <TierManagement />}
+          {activeTab === 'ledger' && <LedgerManagement />}
+          {activeTab === 'rights' && <RightsManagement />}
           {activeTab === 'blacklist' && <BlacklistManagement />}
         </div>
       </div>

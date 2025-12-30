@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { useQuery } from '@tanstack/react-query';
+import ledgerService from '../api/ledgerService';
 import '../styles/ledger.css';
 
 export default function Ledger() {
@@ -10,8 +12,14 @@ export default function Ledger() {
   const [selectedQuarter, setSelectedQuarter] = useState(''); // 'Q1', 'Q2', 'Q3', 'Q4'
   const [selectedYear, setSelectedYear] = useState('2025');
 
-  // 샘플 데이터 (더 많은 데이터 추가)
-  const [allTransactions] = useState([
+  // API에서 거래 내역 조회
+  const { data: allTransactions = [], isLoading, isError } = useQuery({
+    queryKey: ['ledger-transactions'],
+    queryFn: () => ledgerService.getTransactions({ auth: false }),
+  });
+
+  // 샘플 데이터 (백업용 - API 연동 전까지 사용)
+  const sampleTransactions = [
     // 1분기 (1-3월)
     { id: 1, date: '2025-01-15', type: 'income', category: '회비', amount: 50000, description: '1월 정기 회비', memo: '10명 회비 입금 완료' },
     { id: 2, date: '2025-01-20', type: 'expense', category: '이벤트', amount: 30000, description: '신년 이벤트 상금', memo: '1등 상금 지급' },
@@ -47,7 +55,10 @@ export default function Ledger() {
     { id: 26, date: '2025-11-20', type: 'expense', category: '기타', amount: 40000, description: '서버 유지비', memo: '연간 구독' },
     { id: 27, date: '2025-12-10', type: 'income', category: '회비', amount: 50000, description: '12월 정기 회비', memo: '10명 회비 입금 완료' },
     { id: 28, date: '2025-12-25', type: 'expense', category: '이벤트', amount: 100000, description: '크리스마스 이벤트', memo: '선물 및 상금' }
-  ]);
+  ];
+
+  // 실제 사용할 거래 내역 (API 데이터가 없으면 샘플 데이터 사용)
+  const transactions = allTransactions.length > 0 ? allTransactions : sampleTransactions;
 
   // 분기 판단 함수
   const getQuarter = (date) => {
@@ -61,22 +72,22 @@ export default function Ledger() {
   // 필터링된 거래 내역
   const filteredTransactions = useMemo(() => {
     if (filterType === 'all') {
-      return allTransactions;
+      return transactions;
     }
 
     if (filterType === 'monthly' && selectedMonth) {
-      return allTransactions.filter(t => t.date.startsWith(selectedMonth));
+      return transactions.filter(t => t.date.startsWith(selectedMonth));
     }
 
     if (filterType === 'quarterly' && selectedQuarter) {
-      return allTransactions.filter(t => {
+      return transactions.filter(t => {
         const year = t.date.split('-')[0];
         return year === selectedYear && getQuarter(t.date) === selectedQuarter;
       });
     }
 
-    return allTransactions;
-  }, [filterType, selectedMonth, selectedQuarter, selectedYear, allTransactions]);
+    return transactions;
+  }, [filterType, selectedMonth, selectedQuarter, selectedYear, transactions]);
 
   // 총 수입 계산
   const totalIncome = filteredTransactions
@@ -145,6 +156,25 @@ export default function Ledger() {
     return '기간 선택';
   };
 
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="ledger-page">
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '400px',
+            fontSize: '1.25rem',
+            color: '#64748b'
+          }}>
+            로딩 중...
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="ledger-page">
@@ -154,6 +184,17 @@ export default function Ledger() {
             <h1 className="ledger-title">Fund Ledger</h1>
             <p className="ledger-subtitle">클랜 공금 수입 및 지출 내역</p>
           </div>
+          {isError && (
+            <div style={{
+              padding: '0.75rem 1rem',
+              background: '#fee2e2',
+              color: '#dc2626',
+              borderRadius: '8px',
+              fontSize: '0.875rem'
+            }}>
+              데이터를 불러오는데 실패했습니다. 샘플 데이터를 표시합니다.
+            </div>
+          )}
         </div>
 
         {/* 필터 섹션 */}

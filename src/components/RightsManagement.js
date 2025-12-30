@@ -91,8 +91,37 @@ export default function RightsManagement() {
     <div className="rights-management">
       <div className="table-controls">
         <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>권한 관리</h3>
-        <button className="btn-primary" onClick={() => setShowAddModal(true)}>
-          + 새 권한 추가
+        <button
+          onClick={() => setShowAddModal(true)}
+          style={{
+            padding: '0.75rem 1.5rem',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.5)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          새 권한 추가
         </button>
       </div>
 
