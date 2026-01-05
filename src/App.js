@@ -11,6 +11,7 @@ import DiscordCallback from './pages/DiscordCallback';
 import SignupComplete from './pages/SignupComplete';
 import Profile from './pages/Profile';
 import GameStatsDemo from './pages/GameStatsDemo';
+import GameStatsAdvanced from './pages/GameStatsAdvanced';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
       <Route path="/signup/complete" element={<SignupComplete />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/game-stats-demo" element={<GameStatsDemo />} />
+      <Route path="/game-stats-advanced" element={<GameStatsAdvanced />} />
       <Route path="/*" element={<Home />} />
     </Routes>
   );

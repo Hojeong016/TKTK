@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
 import { isAuthenticated, setUser as saveUser } from '../utils/discord-auth';
@@ -8,14 +8,11 @@ import memberService from '../api/memberService';
 import ActivityHeatmap from '../components/ActivityHeatmap';
 import MatchTimeline from '../components/MatchTimeline';
 import GameStatsCards from '../components/GameStatsCards';
-import {
-  generateActivityData,
-  activitySummary,
-  overallStats,
-  recentMatches,
-  mapStats,
-  weaponStats
-} from '../data/dummyGameStats';
+import PerformanceTrendChart from '../components/PerformanceTrendChart';
+import StatsComparisonBar from '../components/StatsComparisonBar';
+import MapStatsGrid from '../components/MapStatsGrid';
+import { AchievementGrid } from '../components/AchievementCard';
+import gameStatsService from '../api/gameStatsService';
 
 /**
  * TKTK 티어 레벨 코드를 한글로 변환
@@ -36,10 +33,20 @@ export default function Profile() {
   const [error, setError] = useState(null);
   const [isJoining, setIsJoining] = useState(false);
   const [activeTab, setActiveTab] = useState('basic'); // 'basic' or 'stats'
-
-  // 게임 통계 더미 데이터
-  const [activityData] = useState(generateActivityData());
-  const [gameStats] = useState(overallStats);
+  const [statsTab, setStatsTab] = useState('summary'); // 'summary', 'trends', 'maps', 'matches', 'achievements'
+  const [activityData, setActivityData] = useState([]);
+  const [activitySummary, setActivitySummary] = useState({});
+  const [overallStats, setOverallStats] = useState(null);
+  const [modeComparison, setModeComparison] = useState({});
+  const [performanceTrends, setPerformanceTrends] = useState([]);
+  const [mapStats, setMapStats] = useState([]);
+  const [seasonStats, setSeasonStats] = useState([]);
+  const [currentSeason, setCurrentSeason] = useState(null);
+  const [recentMatches, setRecentMatches] = useState([]);
+  const [achievements] = useState([]);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsError, setStatsError] = useState(null);
+  const memberId = user?.id;
 
   useEffect(() => {
     // 로그인 확인
@@ -74,6 +81,109 @@ export default function Profile() {
       setLoading(false);
     }
   };
+
+  const fetchGameStats = useCallback(async (memberId) => {
+    if (!memberId) return;
+
+    setStatsLoading(true);
+    setStatsError(null);
+
+    try {
+      const [
+        activityResult,
+        statsResult,
+        trendsResult,
+        mapResult,
+        seasonResult,
+        matchResult
+      ] = await Promise.allSettled([
+        gameStatsService.getActivity(memberId),
+        gameStatsService.getStats(memberId),
+        gameStatsService.getTrends(memberId),
+        gameStatsService.getMapStats(memberId),
+        gameStatsService.getSeasonStats(memberId),
+        gameStatsService.getMatches(memberId, { limit: 20 })
+      ]);
+
+      let hasPartialError = false;
+      let hasCriticalError = false;
+
+      const handleError = (label, reason, critical = false) => {
+        console.error(`${label} 로드 실패:`, reason);
+        if (critical) {
+          hasCriticalError = true;
+        } else {
+          hasPartialError = true;
+        }
+      };
+
+      if (activityResult.status === 'fulfilled') {
+        const activities = activityResult.value?.activities || [];
+        const summary = activityResult.value?.summary || {};
+        setActivityData(activities);
+        setActivitySummary(summary);
+      } else {
+        handleError('활동 히트맵', activityResult.reason, true);
+      }
+
+      if (statsResult.status === 'fulfilled') {
+        const byModeRaw = statsResult.value?.byMode || {};
+        const normalizedByMode = Object.entries(byModeRaw).reduce((acc, [key, value]) => {
+          acc[key.toLowerCase()] = value;
+          return acc;
+        }, {});
+
+        setOverallStats(statsResult.value?.overall || null);
+        setModeComparison(normalizedByMode);
+      } else {
+        handleError('기본 통계', statsResult.reason, true);
+      }
+
+      if (trendsResult.status === 'fulfilled') {
+        setPerformanceTrends(trendsResult.value?.trends || []);
+      } else {
+        handleError('성적 추이', trendsResult.reason, false);
+      }
+
+      if (mapResult.status === 'fulfilled') {
+        setMapStats(mapResult.value?.maps || []);
+      } else {
+        handleError('맵 통계', mapResult.reason, false);
+      }
+
+      if (seasonResult.status === 'fulfilled') {
+        setSeasonStats(seasonResult.value?.seasons || []);
+        setCurrentSeason(seasonResult.value?.currentSeason || null);
+      } else {
+        handleError('시즌 통계', seasonResult.reason, false);
+      }
+
+      if (matchResult.status === 'fulfilled') {
+        setRecentMatches(matchResult.value?.matches || []);
+      } else {
+        handleError('매치 이력', matchResult.reason, true);
+      }
+
+      if (hasCriticalError) {
+        setStatsError('게임 통계를 불러오는 중 오류가 발생했습니다.');
+      } else if (hasPartialError) {
+        setStatsError('일부 통계를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        setStatsError(null);
+      }
+    } catch (err) {
+      console.error('게임 통계 로드 실패:', err);
+      setStatsError('게임 통계를 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setStatsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (memberId) {
+      fetchGameStats(memberId);
+    }
+  }, [memberId, fetchGameStats]);
 
   const getSyncStatusInfo = (status) => {
     switch (status) {
@@ -614,78 +724,187 @@ export default function Profile() {
           {/* Stats Tab */}
           {activeTab === 'stats' && (
             <div>
-              {/* Activity Heatmap */}
-              <ActivityHeatmap data={activityData} summary={activitySummary} />
-
-              {/* Main Stats Cards */}
-              <GameStatsCards stats={gameStats} />
-
-              {/* Recent Matches */}
-              <MatchTimeline matches={recentMatches} limit={5} />
-
-              {/* Quick Stats Grid */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: '1rem',
-                marginTop: '1.5rem'
-              }}>
-                {/* 선호 맵 */}
-                <div style={{
-                  background: 'white',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                  border: '1px solid #e5e7eb'
-                }}>
-                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
-                    선호 맵
-                  </h4>
-                  {mapStats.slice(0, 3).map((map) => (
-                    <div key={map.name} style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: '0.5rem 0',
-                      borderBottom: '1px solid #f3f4f6'
-                    }}>
-                      <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: 500 }}>
-                        {map.name}
-                      </span>
-                      <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                        {map.matches}경기
-                      </span>
-                    </div>
-                  ))}
+              {statsLoading && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      border: '3px solid #e2e8f0',
+                      borderTopColor: '#3b82f6',
+                      borderRadius: '50%'
+                    }}
+                  />
                 </div>
+              )}
 
-                {/* 자주 쓰는 무기 */}
+              {statsError && (
                 <div style={{
-                  background: 'white',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                  border: '1px solid #e5e7eb'
+                  background: '#fef2f2',
+                  color: '#b91c1c',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem',
+                  border: '1px solid #fecaca',
+                  fontSize: '0.9rem'
                 }}>
-                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
-                    자주 쓰는 무기
-                  </h4>
-                  {weaponStats.slice(0, 3).map((weapon) => (
-                    <div key={weapon.name} style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: '0.5rem 0',
-                      borderBottom: '1px solid #f3f4f6'
-                    }}>
-                      <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: 500 }}>
-                        {weapon.name}
-                      </span>
-                      <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                        {weapon.kills}킬
-                      </span>
-                    </div>
-                  ))}
+                  {statsError}
                 </div>
+              )}
+
+              {/* Activity Heatmap - Always visible */}
+              <div style={{ marginBottom: '2rem' }}>
+                <ActivityHeatmap data={activityData} summary={activitySummary} />
               </div>
+
+              {/* Stats Sub-Tabs */}
+              <div style={{
+                display: 'flex',
+                gap: '0.5rem',
+                marginBottom: '2rem',
+                borderBottom: '2px solid #e5e7eb',
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  onClick={() => setStatsTab('summary')}
+                  style={{
+                    padding: '0.75rem 1.25rem',
+                    background: 'transparent',
+                    color: statsTab === 'summary' ? '#667eea' : '#6b7280',
+                    border: 'none',
+                    borderBottom: statsTab === 'summary' ? '2px solid #667eea' : '2px solid transparent',
+                    marginBottom: '-2px',
+                    fontSize: '0.875rem',
+                    fontWeight: statsTab === 'summary' ? 600 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  기본 통계
+                </button>
+                <button
+                  onClick={() => setStatsTab('trends')}
+                  style={{
+                    padding: '0.75rem 1.25rem',
+                    background: 'transparent',
+                    color: statsTab === 'trends' ? '#667eea' : '#6b7280',
+                    border: 'none',
+                    borderBottom: statsTab === 'trends' ? '2px solid #667eea' : '2px solid transparent',
+                    marginBottom: '-2px',
+                    fontSize: '0.875rem',
+                    fontWeight: statsTab === 'trends' ? 600 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  성적 추이
+                </button>
+                <button
+                  onClick={() => setStatsTab('maps')}
+                  style={{
+                    padding: '0.75rem 1.25rem',
+                    background: 'transparent',
+                    color: statsTab === 'maps' ? '#667eea' : '#6b7280',
+                    border: 'none',
+                    borderBottom: statsTab === 'maps' ? '2px solid #667eea' : '2px solid transparent',
+                    marginBottom: '-2px',
+                    fontSize: '0.875rem',
+                    fontWeight: statsTab === 'maps' ? 600 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  맵/시즌
+                </button>
+                <button
+                  onClick={() => setStatsTab('matches')}
+                  style={{
+                    padding: '0.75rem 1.25rem',
+                    background: 'transparent',
+                    color: statsTab === 'matches' ? '#667eea' : '#6b7280',
+                    border: 'none',
+                    borderBottom: statsTab === 'matches' ? '2px solid #667eea' : '2px solid transparent',
+                    marginBottom: '-2px',
+                    fontSize: '0.875rem',
+                    fontWeight: statsTab === 'matches' ? 600 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  매치 이력
+                </button>
+                <button
+                  onClick={() => setStatsTab('achievements')}
+                  style={{
+                    padding: '0.75rem 1.25rem',
+                    background: 'transparent',
+                    color: statsTab === 'achievements' ? '#667eea' : '#6b7280',
+                    border: 'none',
+                    borderBottom: statsTab === 'achievements' ? '2px solid #667eea' : '2px solid transparent',
+                    marginBottom: '-2px',
+                    fontSize: '0.875rem',
+                    fontWeight: statsTab === 'achievements' ? 600 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  업적
+                </button>
+              </div>
+
+              {/* 1. 기본 통계 탭 - 게임 통계 카드만 */}
+              {statsTab === 'summary' && (
+                <div>
+                  <GameStatsCards stats={overallStats || {}} />
+                </div>
+              )}
+
+              {/* 2. 성적 추이 탭 - 추이 차트 + 모드 비교 */}
+              {statsTab === 'trends' && (
+                <div>
+                  <PerformanceTrendChart performanceTrends={performanceTrends} />
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <StatsComparisonBar modeComparison={modeComparison} />
+                  </div>
+                </div>
+              )}
+
+              {/* 3. 맵/시즌 탭 - 맵 통계 + 시즌 비교 */}
+              {statsTab === 'maps' && (
+                <div>
+                  <MapStatsGrid maps={mapStats} />
+                  <div style={{
+                    marginTop: '1.5rem',
+                    background: '#f3f4f6',
+                    borderRadius: '12px',
+                    padding: '2rem',
+                    textAlign: 'center',
+                    border: '1px dashed #cbd5f5',
+                    color: '#4b5563'
+                  }}>
+                    <h4 style={{ marginBottom: '0.5rem' }}>시즌 비교 기능 준비 중</h4>
+                    <p style={{ margin: 0, fontSize: '0.95rem' }}>
+                      시즌별 통계는 곧 제공될 예정입니다.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* 4. 매치 이력 탭 */}
+              {statsTab === 'matches' && (
+                <div>
+                  <MatchTimeline matches={recentMatches} limit={20} />
+                </div>
+              )}
+
+              {/* 5. 업적 탭 */}
+              {statsTab === 'achievements' && (
+                <div>
+                  <AchievementGrid achievements={achievements} filter="all" />
+                </div>
+              )}
             </div>
           )}
         </motion.div>

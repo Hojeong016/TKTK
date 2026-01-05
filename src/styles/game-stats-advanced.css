@@ -1,0 +1,53 @@
+/* Game Stats Advanced Page */
+
+.game-stats-advanced {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.page-description {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.stats-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.stats-section {
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .game-stats-advanced {
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .page-description {
+    font-size: 0.875rem;
+  }
+
+  .stats-sections {
+    gap: 1.5rem;
+  }
+}

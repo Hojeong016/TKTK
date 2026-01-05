@@ -66,11 +66,11 @@ export default function GameStatsCards({ stats = {} }) {
         {mainStats.map((stat) => (
           <div key={stat.id} className="main-stat-card">
             <div className="stat-card-header">
-              <span className="stat-label">{stat.label}</span>
-              <span className="stat-trend positive">{stat.trend}</span>
+              <span className="main-stat-label">{stat.label}</span>
+              <span className="main-stat-trend positive">{stat.trend}</span>
             </div>
             <div className="stat-card-body">
-              <div className="stat-value">{stat.value}</div>
+              <div className="main-stat-value">{stat.value}</div>
             </div>
           </div>
         ))}

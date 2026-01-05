@@ -85,7 +85,7 @@ export default function MatchTimeline({ matches = [], limit = 5, showDetails = t
               {/* 헤더 */}
               <div className="match-card-header">
                 <div className="match-header-left">
-                  <span className={`rank-badge ${rankBadge.class}`}>
+                  <span className={`match-rank-badge ${rankBadge.class}`}>
                     {rankBadge.icon}
                   </span>
                   <span className="match-mode">{modeLabel.toUpperCase()}</span>

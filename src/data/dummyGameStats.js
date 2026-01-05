@@ -75,8 +75,7 @@ export const activitySummary = {
   activeDays: 234,
   currentStreak: 7,
   longestStreak: 28,
-  totalMatches: 1245,
-  avgMatchesPerDay: 3.4
+  totalMatches: 1245
 };
 
 // 종합 통계
@@ -84,19 +83,14 @@ export const overallStats = {
   totalMatches: 156,
   wins: 28,
   top10: 89,
+  top10Rate: 57.05,
   kills: 342,
-  deaths: 128,
   assists: 67,
   kd: 2.67,
   winRate: 17.95,
-  top10Rate: 57.05,
   avgDamage: 456.8,
-  avgSurvivalTime: 1245,
   headshotRate: 34.5,
-  longestKill: 487,
-  totalDistance: 125678.5,
-  roadKills: 12,
-  vehicleDestroys: 8
+  longestKill: 487
 };
 
 // 모드별 통계
@@ -419,66 +413,126 @@ export const weaponStats = [
   }
 ];
 
-// 시즌별 통계
+// 시즌별 통계 (월 단위)
 export const seasonStats = [
   {
-    seasonId: '2024-02',
-    seasonName: '2024 Season 2',
-    startDate: '2024-04-01',
+    seasonId: '2024-06',
+    seasonName: '2024년 6월',
+    startDate: '2024-06-01',
     endDate: '2024-06-30',
     isCurrent: true,
     stats: {
-      totalMatches: 89,
-      wins: 15,
-      top10: 52,
-      kills: 198,
-      deaths: 70,
-      kd: 2.82,
-      winRate: 16.85,
-      avgDamage: 478.3,
+      totalMatches: 42,
+      wins: 8,
+      top10: 24,
+      kills: 98,
+      deaths: 34,
+      kd: 2.88,
+      winRate: 19.05,
+      avgDamage: 485.2,
       bestRank: 1,
       tier: 'Master',
       rp: 4720
     }
   },
   {
-    seasonId: '2024-01',
-    seasonName: '2024 Season 1',
-    startDate: '2024-01-01',
-    endDate: '2024-03-31',
+    seasonId: '2024-05',
+    seasonName: '2024년 5월',
+    startDate: '2024-05-01',
+    endDate: '2024-05-31',
     isCurrent: false,
     stats: {
-      totalMatches: 156,
-      wins: 28,
-      top10: 89,
-      kills: 342,
-      deaths: 128,
-      kd: 2.67,
-      winRate: 17.95,
-      avgDamage: 456.8,
-      bestRank: 1,
+      totalMatches: 38,
+      wins: 6,
+      top10: 21,
+      kills: 87,
+      deaths: 32,
+      kd: 2.72,
+      winRate: 15.79,
+      avgDamage: 468.5,
+      bestRank: 2,
       tier: 'Master',
       rp: 4580
     }
   },
   {
-    seasonId: '2023-04',
-    seasonName: '2023 Season 4',
-    startDate: '2023-10-01',
-    endDate: '2023-12-31',
+    seasonId: '2024-04',
+    seasonName: '2024년 4월',
+    startDate: '2024-04-01',
+    endDate: '2024-04-30',
     isCurrent: false,
     stats: {
-      totalMatches: 134,
-      wins: 22,
-      top10: 76,
-      kills: 289,
-      deaths: 118,
-      kd: 2.45,
-      winRate: 16.42,
+      totalMatches: 45,
+      wins: 7,
+      top10: 26,
+      kills: 102,
+      deaths: 38,
+      kd: 2.68,
+      winRate: 15.56,
+      avgDamage: 472.8,
+      bestRank: 1,
+      tier: 'Diamond',
+      rp: 4380
+    }
+  },
+  {
+    seasonId: '2024-03',
+    seasonName: '2024년 3월',
+    startDate: '2024-03-01',
+    endDate: '2024-03-31',
+    isCurrent: false,
+    stats: {
+      totalMatches: 51,
+      wins: 9,
+      top10: 29,
+      kills: 112,
+      deaths: 42,
+      kd: 2.67,
+      winRate: 17.65,
+      avgDamage: 456.8,
+      bestRank: 1,
+      tier: 'Diamond',
+      rp: 4220
+    }
+  },
+  {
+    seasonId: '2024-02',
+    seasonName: '2024년 2월',
+    startDate: '2024-02-01',
+    endDate: '2024-02-29',
+    isCurrent: false,
+    stats: {
+      totalMatches: 36,
+      wins: 5,
+      top10: 19,
+      kills: 78,
+      deaths: 31,
+      kd: 2.52,
+      winRate: 13.89,
+      avgDamage: 442.3,
+      bestRank: 3,
+      tier: 'Platinum',
+      rp: 3980
+    }
+  },
+  {
+    seasonId: '2024-01',
+    seasonName: '2024년 1월',
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    isCurrent: false,
+    stats: {
+      totalMatches: 44,
+      wins: 6,
+      top10: 22,
+      kills: 89,
+      deaths: 38,
+      kd: 2.34,
+      winRate: 13.64,
       avgDamage: 423.5,
       bestRank: 2,
-      tier: 'Diamond',
-      rp: 4120
+      tier: 'Platinum',
+      rp: 3750
     }
   }
 ];
@@ -493,7 +547,6 @@ export const achievements = [
     unlockedAt: '2024-03-15T10:20:00Z',
     progress: 28,
     target: 10,
-    icon: '🏆',
     rarity: 'rare'
   },
   {
@@ -504,7 +557,6 @@ export const achievements = [
     unlockedAt: '2024-05-20T14:35:00Z',
     progress: 342,
     target: 300,
-    icon: '🎯',
     rarity: 'rare'
   },
   {
@@ -515,7 +567,6 @@ export const achievements = [
     progress: 118,
     target: 100,
     progressPercentage: 47.2,
-    icon: '🔫',
     rarity: 'epic'
   },
   {
@@ -526,7 +577,6 @@ export const achievements = [
     progress: 1245,
     target: 1200,
     progressPercentage: 62.25,
-    icon: '⏱️',
     rarity: 'rare'
   },
   {
@@ -537,7 +587,35 @@ export const achievements = [
     unlockedAt: '2024-06-10T18:45:00Z',
     progress: 1567.8,
     target: 1500,
-    icon: '💥',
+    rarity: 'epic'
+  },
+  {
+    id: 'marksman',
+    name: '저격수',
+    description: '300m 이상 거리에서 10킬 달성',
+    unlocked: true,
+    unlockedAt: '2024-04-22T09:15:00Z',
+    progress: 15,
+    target: 10,
+    rarity: 'legendary'
+  },
+  {
+    id: 'veteran',
+    name: '베테랑',
+    description: '100경기 이상 플레이',
+    unlocked: true,
+    unlockedAt: '2024-02-10T16:30:00Z',
+    progress: 156,
+    target: 100,
+    rarity: 'common'
+  },
+  {
+    id: 'squad_leader',
+    name: '스쿼드 리더',
+    description: '스쿼드 모드에서 5회 우승',
+    unlocked: false,
+    progress: 3,
+    target: 5,
     rarity: 'epic'
   }
 ];
@@ -554,39 +632,26 @@ export const personalRecords = {
   mostAssistsInMatch: 7
 };
 
-// 성적 추이 데이터 (최근 30일)
-export const performanceTrends = {
-  kd: [],
-  winRate: [],
-  avgDamage: [],
-  kills: []
-};
+// 성적 추이 데이터 (최근 30일) - 모든 지표를 하나의 배열로
+export const performanceTrends = [];
 
 // 최근 30일 데이터 생성
 for (let i = 29; i >= 0; i--) {
   const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+  const matches = Math.floor(Math.random() * 5) + 1;
 
-  performanceTrends.kd.push({
+  performanceTrends.push({
     date,
-    value: 2.0 + Math.random() * 1.5,
-    matches: Math.floor(Math.random() * 5) + 1
-  });
-
-  performanceTrends.winRate.push({
-    date,
-    value: 10 + Math.random() * 15,
-    matches: Math.floor(Math.random() * 5) + 1
-  });
-
-  performanceTrends.avgDamage.push({
-    date,
-    value: 350 + Math.random() * 200,
-    matches: Math.floor(Math.random() * 5) + 1
-  });
-
-  performanceTrends.kills.push({
-    date,
-    value: Math.floor(Math.random() * 10) + 3,
-    matches: Math.floor(Math.random() * 5) + 1
+    kd: 2.0 + Math.random() * 1.5,
+    winRate: 10 + Math.random() * 15,
+    avgDamage: 350 + Math.random() * 200,
+    kills: Math.floor(Math.random() * 10) + 3,
+    matches
   });
 }
+
+// Component prop aliases (컴포넌트에서 사용하는 prop 이름과 일치시키기 위한 별칭)
+export const modeComparison = statsByMode; // StatsComparisonBar에서 사용
+export const maps = mapStats; // MapStatsGrid에서 사용
+export const weapons = weaponStats; // WeaponStatsTable에서 사용
+export const seasons = seasonStats; // SeasonComparison에서 사용

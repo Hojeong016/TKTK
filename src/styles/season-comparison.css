@@ -1,0 +1,250 @@
+/* Season Comparison */
+
+.season-comparison-container {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.season-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.season-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.trend-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.trend-badge.up {
+  background: #f0fdf4;
+  color: #10b981;
+}
+
+.trend-badge.down {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.trend-badge.neutral {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.metric-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.metric-tab {
+  padding: 0.375rem 0.875rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.metric-tab:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.metric-tab.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.season-chart-wrapper {
+  margin-bottom: 2rem;
+}
+
+/* Custom Tooltip */
+.season-tooltip {
+  background: rgba(17, 24, 39, 0.95);
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tooltip-season-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.25rem;
+}
+
+.tooltip-value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.tooltip-period {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-bottom: 0.25rem;
+}
+
+.tooltip-badge {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  background: #667eea;
+  color: white;
+  border-radius: 3px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+/* Season List */
+.season-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.season-card {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.season-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.season-card.current {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #eff6ff 0%, #f9fafb 100%);
+}
+
+.season-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.season-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.current-badge {
+  padding: 0.125rem 0.5rem;
+  background: #667eea;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.season-period {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.season-quick-stats {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.quick-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.quick-stat .label {
+  font-size: 0.625rem;
+  color: #9ca3af;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quick-stat .value {
+  font-size: 0.875rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+/* Empty State */
+.empty-season {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: #9ca3af;
+}
+
+.empty-season p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .season-comparison-container {
+    padding: 1rem;
+  }
+
+  .season-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .metric-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  .metric-tab {
+    flex-shrink: 0;
+  }
+
+  .season-list {
+    grid-template-columns: 1fr;
+  }
+}

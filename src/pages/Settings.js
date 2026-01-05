@@ -7,12 +7,13 @@ import TierManagement from '../components/TierManagement';
 import BlacklistManagement from '../components/BlacklistManagement';
 import ClanStatusManagement from '../components/ClanStatusManagement';
 import LedgerManagement from '../components/LedgerManagement';
+import AchievementManagement from '../components/AchievementManagement';
 import { isAuthenticated, isAdmin } from '../utils/discord-auth';
 import useStore from '../store/useStore';
 import '../styles/settings.css';
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = React.useState('members'); // 'members', 'clan', 'rights', 'tier', 'ledger', or 'blacklist'
+  const [activeTab, setActiveTab] = React.useState('members'); // 'members', 'clan', 'rights', 'tier', 'ledger', 'blacklist', or 'achievements'
   const navigate = useNavigate();
   const loadRightsConfig = useStore(state => state.loadRightsConfig);
 
@@ -88,6 +89,12 @@ export default function Settings() {
           >
             블랙리스트 관리
           </button>
+          <button
+            className={`settings-tab ${activeTab === 'achievements' ? 'active' : ''}`}
+            onClick={() => setActiveTab('achievements')}
+          >
+            업적 관리
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -98,6 +105,7 @@ export default function Settings() {
           {activeTab === 'ledger' && <LedgerManagement />}
           {activeTab === 'rights' && <RightsManagement />}
           {activeTab === 'blacklist' && <BlacklistManagement />}
+          {activeTab === 'achievements' && <AchievementManagement />}
         </div>
       </div>
     </Layout>
