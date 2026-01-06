@@ -80,9 +80,9 @@
   .sidebar {
     display: block;
     width: var(--sidebar-width);
-    border-right: 1px solid #eee;
+    border-right: 1px solid #e5e7eb;
     padding: 16px;
-    background: #fff;
+    background: #f9fafb;
   }
   .app-main {
     max-width: var(--max-width);

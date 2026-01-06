@@ -10,28 +10,24 @@ export default function GameStatsCards({ stats = {} }) {
       id: 'matches',
       label: '총 매치',
       value: stats.totalMatches || 0,
-      trend: '+12%',
       color: '#667eea'
     },
     {
       id: 'winRate',
       label: '승률',
       value: `${(stats.winRate || 0).toFixed(1)}%`,
-      trend: '+2.3%',
       color: '#667eea'
     },
     {
       id: 'kd',
       label: 'K/D 비율',
       value: (stats.kd || 0).toFixed(2),
-      trend: '+0.15',
       color: '#667eea'
     },
     {
       id: 'avgDamage',
       label: '평균 데미지',
       value: (stats.avgDamage || 0).toFixed(1),
-      trend: '+23.5',
       color: '#667eea'
     }
   ];
@@ -67,7 +63,15 @@ export default function GameStatsCards({ stats = {} }) {
           <div key={stat.id} className="main-stat-card">
             <div className="stat-card-header">
               <span className="main-stat-label">{stat.label}</span>
-              <span className="main-stat-trend positive">{stat.trend}</span>
+              {stat.trend != null && (
+                <span
+                  className={`main-stat-trend ${
+                    stat.trend > 0 ? 'positive' : stat.trend < 0 ? 'negative' : 'neutral'
+                  }`}
+                >
+                  {stat.trend > 0 ? `+${stat.trend}` : stat.trend}
+                </span>
+              )}
             </div>
             <div className="stat-card-body">
               <div className="main-stat-value">{stat.value}</div>

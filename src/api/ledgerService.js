@@ -12,7 +12,7 @@ const ledgerService = {
   async getTransactions({ auth = true } = {}) {
     try {
       const res = await apiClient.get('/api/ledger/transactions', { auth });
-      return res.data;
+      return res.data?.data ?? res.data ?? [];
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
       throw error;
@@ -27,7 +27,7 @@ const ledgerService = {
   async getTransactionById(id) {
     try {
       const res = await apiClient.get(`/api/ledger/transactions/${id}`);
-      return res.data;
+      return res.data?.data ?? res.data ?? null;
     } catch (error) {
       console.error(`Failed to fetch transaction ${id}:`, error);
       throw error;
@@ -48,7 +48,7 @@ const ledgerService = {
   async createTransaction(transactionData) {
     try {
       const res = await apiClient.post('/api/ledger/transactions', transactionData);
-      return res.data;
+      return res.data?.data ?? res.data ?? null;
     } catch (error) {
       console.error('Failed to create transaction:', error);
       throw error;
@@ -64,7 +64,7 @@ const ledgerService = {
   async updateTransaction(id, transactionData) {
     try {
       const res = await apiClient.put(`/api/ledger/transactions/${id}`, transactionData);
-      return res.data;
+      return res.data?.data ?? res.data ?? null;
     } catch (error) {
       console.error(`Failed to update transaction ${id}:`, error);
       throw error;
@@ -79,7 +79,7 @@ const ledgerService = {
   async deleteTransaction(id) {
     try {
       const res = await apiClient.delete(`/api/ledger/transactions/${id}`);
-      return res.data;
+      return res.data?.data ?? res.data ?? null;
     } catch (error) {
       console.error(`Failed to delete transaction ${id}:`, error);
       throw error;
@@ -97,7 +97,7 @@ const ledgerService = {
     try {
       const queryParams = new URLSearchParams(params);
       const res = await apiClient.get(`/api/ledger/statistics?${queryParams.toString()}`);
-      return res.data;
+      return res.data?.data ?? res.data ?? {};
     } catch (error) {
       console.error('Failed to fetch statistics:', error);
       throw error;
@@ -111,7 +111,7 @@ const ledgerService = {
   async getCategories() {
     try {
       const res = await apiClient.get('/api/ledger/categories');
-      return res.data;
+      return res.data?.data ?? res.data ?? [];
     } catch (error) {
       console.error('Failed to fetch categories:', error);
       // 실패 시 기본 카테고리 반환

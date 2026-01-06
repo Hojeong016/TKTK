@@ -14,6 +14,41 @@ const STREAM_STATUS_LABELS = {
   unsupported: '브라우저에서 SSE를 지원하지 않습니다',
 };
 
+const formatLastPlayed = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const dateLabel = new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+
+  return {
+    dateLabel,
+    timeLabel: formatTimestamp(date),
+  };
+};
+
+const getPlayerAvatarUrl = (player) => {
+  if (!player) return null;
+  return (
+    player.discordAvatarUrl ||
+    player.avatarUrl ||
+    player.profileImageUrl ||
+    player.memberAvatarUrl ||
+    player.memberAvatar ||
+    player.avatar ||
+    null
+  );
+};
+
+const getPlayerInitial = (player) => {
+  if (!player?.memberName) return 'P';
+  return player.memberName.charAt(0).toUpperCase();
+};
+
 export default function PubgRank() {
   const count = DEFAULT_COUNT;
 
@@ -32,9 +67,9 @@ export default function PubgRank() {
       topThree.push(null);
     }
     return [
-      { podiumClass: 'podium-silver', circleClass: 'circle-silver', rankLabel: '2위', player: topThree[1] },
-      { podiumClass: 'podium-gold', circleClass: 'circle-gold', rankLabel: '1위', player: topThree[0] },
-      { podiumClass: 'podium-bronze', circleClass: 'circle-bronze', rankLabel: '3위', player: topThree[2] },
+      { rank: 2, asset: '2p.svg', player: topThree[1] },
+      { rank: 1, asset: '1p.svg', player: topThree[0] },
+      { rank: 3, asset: '3p.svg', player: topThree[2] },
     ];
   }, [rankings]);
 
@@ -45,22 +80,55 @@ export default function PubgRank() {
       {rankings.map((entry, index) => {
         const displayRank = entry.rank ?? index + 1;
         const key = `${entry.gameCode || entry.memberName || 'rank'}-${index}`;
+        const lastPlayed = formatLastPlayed(entry.lastPlayedAt);
+        const entryAvatarUrl = getPlayerAvatarUrl(entry);
+        const entryInitial = getPlayerInitial(entry);
         return (
           <tr key={key}>
             <td className="col-rank">
               <span className="rank-badge">#{displayRank}</span>
             </td>
             <td className="col-member">
-              <div className="member-name">{entry.memberName || 'Unknown'}</div>
-              <div className="member-sub">{entry.memberRemark || 'PUBG Player'}</div>
+              <div className="member-info">
+                <div className={`member-avatar ${entryAvatarUrl ? '' : 'placeholder'}`}>
+                  {entryAvatarUrl ? (
+                    <img src={entryAvatarUrl} alt={`${entry.memberName || '랭커'} 아바타`} />
+                  ) : (
+                    <span>{entryInitial}</span>
+                  )}
+                </div>
+                <div className="member-text">
+                  <div className="member-name">{entry.memberName || 'Unknown'}</div>
+                  <div className="member-sub">{entry.discordName || 'PUBG Player'}</div>
+                </div>
+              </div>
             </td>
             <td className="col-playtime">
-              <div className="playtime-primary">
-                {formatSecondsToClock(entry.totalPlayTime)}
+              <div className="playtime-cell">
+                <div className="playtime-primary">
+                  {formatSecondsToClock(entry.totalPlayTime)}
+                </div>
+                <div className="playtime-secondary">
+                  {formatSecondsToDurationLabel(entry.totalPlayTime)}
+                </div>
               </div>
-              <div className="playtime-secondary">
-                {formatSecondsToDurationLabel(entry.totalPlayTime)}
-              </div>
+            </td>
+            <td className="col-last-played">
+              {entry.lastPlayTime ? (
+                (() => {
+                  const formatted = formatLastPlayed(entry.lastPlayTime);
+                  return (
+                    <div className="last-played-cell">
+                      <span className="last-played-date">{formatted?.dateLabel || '정보 없음'}</span>
+                      {formatted?.timeLabel && (
+                        <span className="last-played-time">{formatted.timeLabel}</span>
+                      )}
+                    </div>
+                  );
+                })()
+              ) : (
+                <div className="last-played-empty">-</div>
+              )}
             </td>
           </tr>
         );
@@ -79,16 +147,36 @@ export default function PubgRank() {
 
         <div className="vanguard-card">
           <div className="rank-podium-wrapper">
-            {podiumPlayers.map(({ podiumClass, circleClass, rankLabel, player }) => (
-              <div className={`podium ${podiumClass}`} key={podiumClass}>
-                <div className={`circle ${circleClass}`}>
-                  <span className="circle-name">
-                    {player?.memberName || '선발대 대기 중'}
-                  </span>
+            {podiumPlayers.map(({ rank, asset, player }, idx) => {
+              const avatarUrl = getPlayerAvatarUrl(player);
+              const initials = getPlayerInitial(player);
+              return (
+                <div className={`podium-slot podium-rank-${rank}`} key={`podium-${rank}`}>
+                  <div className="podium-figure">
+                    <img
+                      className="podium-base"
+                      src={`/assets/tiers/${asset}`}
+                      alt={`${rank}위 포디움`}
+                      draggable="false"
+                    />
+                    <div
+                      className={`podium-avatar ${avatarUrl ? '' : 'placeholder'}`}
+                      style={{ animationDelay: `${idx * 0.15}s` }}
+                    >
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt={`${player?.memberName || '랭커'} 아바타`} />
+                      ) : (
+                        <span>{initials}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="podium-meta">
+                    <div className="podium-name">{player?.memberName || '대기 중'}</div>
+                    <div className="podium-rank-label">{rank}위</div>
+                  </div>
                 </div>
-                <div className="podium-rank-label">{rankLabel}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="stream-status-inline">
             <span className={`stream-indicator stream-${streamStatus}`} aria-label={streamLabel} />
@@ -126,11 +214,12 @@ export default function PubgRank() {
             <table className="rank-table">
               <thead>
                 <tr>
-                  <th className="col-rank">순위</th>
-                  <th className="col-member">멤버</th>
-                  <th className="col-playtime">누적 플레이 타임</th>
-                </tr>
-              </thead>
+              <th className="col-rank">순위</th>
+              <th className="col-member">멤버</th>
+              <th className="col-playtime">누적 플레이 타임</th>
+              <th className="col-last-played">마지막 플레이</th>
+            </tr>
+          </thead>
               {renderTableBody()}
             </table>
           )}

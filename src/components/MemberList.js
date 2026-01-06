@@ -49,11 +49,19 @@ export default function MemberList() {
         <TagFilter tags={tags} />
       </div>
 
-      <div className="card-grid">
-        {filtered.map((m) => (
-          <MemberCard key={m.id} member={m} onSelect={setSelectedItem} />
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <div className="empty-member-state">
+          <div className="empty-member-icon">🎮</div>
+          <h3 className="empty-member-title">가입하고 첫 멤버로 합류하세요</h3>
+          <p className="empty-member-text">클랜의 첫 번째 플레이어가 되어보세요!</p>
+        </div>
+      ) : (
+        <div className="card-grid">
+          {filtered.map((m) => (
+            <MemberCard key={m.id} member={m} onSelect={setSelectedItem} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

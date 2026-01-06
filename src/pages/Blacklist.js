@@ -138,7 +138,6 @@ export default function Blacklist() {
                           </div>
                         </div>
                         <div className="warning-discord">{member.discordName}</div>
-                        <div className="warning-last-reason">{member.reason || '사유 미상'}</div>
                       </div>
                       <div className="warning-date">
                         <div className="date-label">최근 업데이트</div>

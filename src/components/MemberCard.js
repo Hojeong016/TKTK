@@ -19,6 +19,14 @@ export default function MemberCard({ member, onSelect }) {
 
   if (!member) return null;
 
+  const avatarUrl =
+    member.discordAvatarUrl ||
+    member.avatarUrl ||
+    member.info?.avatar ||
+    member.profileImageUrl ||
+    member.discord?.avatarUrl ||
+    null;
+
   const gamename = member.game?.gamename || member.info?.gamename || member.name || 'Unknown';
   const displayName = member.info?.koreaname || member.name || gamename;
   const discordName = member.info?.discordname || '—';
@@ -59,8 +67,17 @@ export default function MemberCard({ member, onSelect }) {
       onKeyDown={(e) => { if (e.key === 'Enter') onSelect?.(member); }}
       aria-label={`Open ${displayName}`}
     >
-      <div className="tier-avatar-wrap" aria-hidden="true">
-        {getTierIcon(tier, { className: 'tier-avatar-img', title: `Tier: ${tier}` })}
+      <div className="member-info member-card-avatar" aria-hidden="true">
+        <div className={`member-avatar ${avatarUrl ? '' : 'placeholder'}`}>
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={`${displayName} 아바타`}
+            />
+          ) : (
+            <span>{displayName.charAt(0)}</span>
+          )}
+        </div>
       </div>
 
       <div className="member-body">

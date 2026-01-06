@@ -132,7 +132,7 @@ export default function DiscordCallback() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 118, 110, 0.8))',
+      background: '#f8fafc',
       padding: '2rem'
     }}>
       <motion.div
@@ -140,13 +140,14 @@ export default function DiscordCallback() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          borderRadius: '16px',
+          background: '#ffffff',
+          borderRadius: '20px',
           padding: '3rem',
           maxWidth: '480px',
           width: '100%',
           textAlign: 'center',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+          border: '1px solid #f1f5f9'
         }}
       >
         {status === 'processing' && (

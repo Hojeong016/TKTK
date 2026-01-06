@@ -15,7 +15,7 @@ export default function Ledger() {
   // API에서 거래 내역 조회
   const { data: allTransactions = [], isLoading, isError } = useQuery({
     queryKey: ['ledger-transactions'],
-    queryFn: () => ledgerService.getTransactions({ auth: false }),
+    queryFn: () => ledgerService.getTransactions({ auth: false })
   });
 
   // 샘플 데이터 (백업용 - API 연동 전까지 사용)
@@ -58,7 +58,11 @@ export default function Ledger() {
   ];
 
   // 실제 사용할 거래 내역 (API 데이터가 없으면 샘플 데이터 사용)
-  const transactions = allTransactions.length > 0 ? allTransactions : sampleTransactions;
+  const transactions = isError
+    ? sampleTransactions
+    : Array.isArray(allTransactions)
+      ? allTransactions
+      : [];
 
   // 분기 판단 함수
   const getQuarter = (date) => {
@@ -193,6 +197,17 @@ export default function Ledger() {
               fontSize: '0.875rem'
             }}>
               데이터를 불러오는데 실패했습니다. 샘플 데이터를 표시합니다.
+            </div>
+          )}
+          {!isError && transactions.length === 0 && (
+            <div style={{
+              padding: '0.75rem 1rem',
+              background: '#eef2ff',
+              color: '#4338ca',
+              borderRadius: '8px',
+              fontSize: '0.875rem'
+            }}>
+              아직 등록된 거래가 없습니다.
             </div>
           )}
         </div>

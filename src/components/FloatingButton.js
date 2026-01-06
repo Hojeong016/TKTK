@@ -6,7 +6,7 @@ import '../styles/floating.css';
  * 디스코드 링크로 연결
  */
 export default function FloatingButton() {
-  const discordUrl = 'https://discord.com/'; // TODO: 실제 디스코드 링크로 변경
+  const discordUrl = 'https://discord.gg/2rpFC2zP'; // TODO: 실제 디스코드 링크로 변경
 
   return (
     <a
@@ -15,7 +15,7 @@ export default function FloatingButton() {
       rel="noreferrer"
       className="floating-button"
       aria-label="Join our Discord"
-      title="디스코드 참여하기"
+      title="개발자 문의하기"
     >
       <svg
         className="discord-icon"

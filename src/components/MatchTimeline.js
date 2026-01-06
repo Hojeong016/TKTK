@@ -14,6 +14,9 @@ import '../styles/match-timeline.css';
 export default function MatchTimeline({ matches = [], limit = 5, showDetails = true }) {
   const displayMatches = matches.slice(0, limit);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [carouselPositions, setCarouselPositions] = useState({});
+  const DETAIL_CARD_WIDTH = 200;
+  const DETAILS_PER_VIEW = 3;
 
   // 순위 배지
   const getRankBadge = (rank) => {
@@ -53,6 +56,20 @@ export default function MatchTimeline({ matches = [], limit = 5, showDetails = t
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const formatDistanceKm = (meters = 0) => {
+    if (!meters || meters <= 0) return '0km';
+    return `${(meters / 1000).toFixed(1)}km`;
+  };
+
+  const formatMemberDamage = (damage) => {
+    if (damage === null || damage === undefined) return '0';
+    const numeric = Number(damage);
+    if (Number.isNaN(numeric)) return '0';
+    return numeric.toFixed(0);
+  };
+
+  const [carouselIndex, setCarouselIndex] = useState(0);
+
   if (!matches || matches.length === 0) {
     return (
       <div className="match-timeline-container">
@@ -79,9 +96,39 @@ export default function MatchTimeline({ matches = [], limit = 5, showDetails = t
           const rankBadge = getRankBadge(match.result.rank);
           const modeLabel = getModeLabel(match.mode);
           const timeAgo = getTimeAgo(match.playedAt);
+          const matchKey = match.matchId || `match-${index}`;
+          const totalDistance = (match.result.rideDistance || 0) + (match.result.walkDistance || 0);
+          const detailStats = [
+            match.result.teamRank ? { label: '팀 순위', value: `#${match.result.teamRank}` } : null,
+            { label: '헤드샷', value: match.result.headshotKills ?? 0 },
+            match.result.longestKill !== undefined
+              ? { label: '최장 킬', value: `${match.result.longestKill.toFixed(1)}m` }
+              : null,
+            { label: '이동 거리', value: formatDistanceKm(totalDistance) },
+            { label: '힐 / 부스트', value: `${match.result.heals ?? 0} / ${match.result.boosts ?? 0}` },
+            match.result.dbno !== undefined ? { label: 'DBNO', value: match.result.dbno } : null,
+            match.result.revives !== undefined ? { label: 'Revives', value: match.result.revives } : null,
+            match.result.weaponsAcquired !== undefined
+              ? { label: '무기 획득', value: match.result.weaponsAcquired }
+              : null
+          ].filter(Boolean);
+          const hasTeamMembers = match.teamMembers && match.teamMembers.length > 0;
+          const storedIndex = carouselPositions[matchKey] || 0;
+          const maxCarouselIndex = Math.max(detailStats.length - DETAILS_PER_VIEW, 0);
+          const carouselIndex = Math.min(storedIndex, maxCarouselIndex);
+          const handlePrev = () =>
+            setCarouselPositions((prev) => ({
+              ...prev,
+              [matchKey]: Math.max(carouselIndex - 1, 0)
+            }));
+          const handleNext = () =>
+            setCarouselPositions((prev) => ({
+              ...prev,
+              [matchKey]: Math.min(carouselIndex + 1, maxCarouselIndex)
+            }));
 
           return (
-            <div key={match.matchId || index} className="match-card">
+            <div key={matchKey} className="match-card">
               {/* 헤더 */}
               <div className="match-card-header">
                 <div className="match-header-left">
@@ -126,33 +173,59 @@ export default function MatchTimeline({ matches = [], limit = 5, showDetails = t
               {/* 상세 통계 */}
               {showDetails && (
                 <div className="match-stats-details">
-                  {match.result.headshotKills > 0 && (
-                    <div className="detail-item">
-                      <span className="detail-label">헤드샷</span>
-                      <span className="detail-value">{match.result.headshotKills}</span>
-                    </div>
-                  )}
+                  <div className="detail-carousel">
+                    <button
+                      className="carousel-btn prev"
+                      onClick={handlePrev}
+                      disabled={carouselIndex === 0}
+                    >
+                      ‹
+                    </button>
 
-                  {match.result.rideDistance > 0 && (
-                    <div className="detail-item">
-                      <span className="detail-label">이동거리</span>
-                      <span className="detail-value">
-                        {(match.result.rideDistance / 1000).toFixed(1)}km
-                      </span>
+                    <div className="detail-carousel-viewport">
+                      <div
+                        className="detail-grid"
+                        style={{
+                          transform: `translateX(-${carouselIndex * DETAIL_CARD_WIDTH}px)`
+                        }}
+                      >
+                        {detailStats.map((detail) => (
+                          <div key={detail.label} className="detail-item">
+                            <span className="detail-label">{detail.label}</span>
+                            <span className="detail-value">{detail.value}</span>
+                          </div>
+                        ))}
+                        {detailStats.length === 0 && (
+                          <div className="detail-item detail-empty">
+                            <span className="detail-label">추가 데이터</span>
+                            <span className="detail-value">준비 중</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
 
-                  {match.result.heals > 0 && (
-                    <div className="detail-item">
-                      <span className="detail-label">회복</span>
-                      <span className="detail-value">{match.result.heals}</span>
-                    </div>
-                  )}
+                    <button
+                      className="carousel-btn next"
+                      onClick={handleNext}
+                      disabled={carouselIndex >= maxCarouselIndex}
+                    >
+                      ›
+                    </button>
+                  </div>
 
-                  {match.result.longestKill > 0 && (
-                    <div className="detail-item">
-                      <span className="detail-label">최장 킬</span>
-                      <span className="detail-value">{match.result.longestKill.toFixed(1)}m</span>
+                  {hasTeamMembers && (
+                    <div className="team-members">
+                      <span className="team-members-label">TEAM</span>
+                      <div className="team-member-list">
+                        {match.teamMembers.map((member) => (
+                          <div key={`${matchKey}-${member.name}`} className="team-member-badge">
+                            <span className="team-member-name">{member.name}</span>
+                            <span className="team-member-stats">
+                              {member.kills}K / {formatMemberDamage(member.damage)}D
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

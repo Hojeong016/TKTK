@@ -24,6 +24,32 @@
   box-shadow: 0 8px 20px rgba(88, 101, 242, 0.6);
 }
 
+/* Tooltip */
+.floating-button::after {
+  content: attr(title);
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 12px;
+  padding: 8px 14px;
+  background: #1e293b;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.floating-button:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(-4px);
+}
+
 .floating-button:active {
   transform: translateY(-2px) scale(1.02);
 }

@@ -17,10 +17,6 @@ export default function Header() {
     if (isAuthenticated()) {
       const currentUser = getUser();
       setUser(currentUser);
-      const role = getRoleFromToken();
-      console.log('Current user:', currentUser);
-      console.log('JWT Role:', role);
-      console.log('Is admin?', isAdmin());
     }
   }, []);
 
