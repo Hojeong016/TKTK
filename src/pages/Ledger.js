@@ -64,9 +64,37 @@ export default function Ledger() {
       ? allTransactions
       : [];
 
+  const getDateValue = (transaction) => {
+    return (
+      transaction.date ||
+      transaction.transactionDate ||
+      transaction.txDate ||
+      transaction.createdAt ||
+      transaction.updatedAt ||
+      ''
+    );
+  };
+
+  const getMonthKey = (date) => {
+    if (!date) return '';
+    const parsed = new Date(date);
+    if (!Number.isNaN(parsed)) {
+      const month = String(parsed.getMonth() + 1).padStart(2, '0');
+      return `${parsed.getFullYear()}-${month}`;
+    }
+    if (typeof date === 'string') {
+      const normalized = date.replace(/[./]/g, '-');
+      const sliceKey = normalized.slice(0, 7);
+      if (/^\d{4}-\d{2}$/.test(sliceKey)) return sliceKey;
+    }
+    return '';
+  };
+
   // 분기 판단 함수
   const getQuarter = (date) => {
-    const month = new Date(date).getMonth() + 1;
+    const parsed = new Date(date);
+    const month = Number.isNaN(parsed) ? null : parsed.getMonth() + 1;
+    if (!month) return 'Q1';
     if (month >= 1 && month <= 3) return 'Q1';
     if (month >= 4 && month <= 6) return 'Q2';
     if (month >= 7 && month <= 9) return 'Q3';
@@ -79,32 +107,46 @@ export default function Ledger() {
       return transactions;
     }
 
-    if (filterType === 'monthly' && selectedMonth) {
-      return transactions.filter(t => t.date.startsWith(selectedMonth));
+    if (filterType === 'monthly') {
+      const monthKeys = transactions
+        .map((t) => getMonthKey(getDateValue(t)))
+        .filter(Boolean);
+      const fallbackMonth = monthKeys[0] || '';
+      const targetMonth = selectedMonth || fallbackMonth;
+      if (!targetMonth) return [];
+      return transactions.filter((t) => getMonthKey(getDateValue(t)) === targetMonth);
     }
 
     if (filterType === 'quarterly' && selectedQuarter) {
-      return transactions.filter(t => {
-        const year = t.date.split('-')[0];
-        return year === selectedYear && getQuarter(t.date) === selectedQuarter;
+      return transactions.filter((t) => {
+        const dateValue = getDateValue(t);
+        const [year] = getMonthKey(dateValue).split('-');
+        return year === selectedYear && getQuarter(dateValue) === selectedQuarter;
       });
     }
 
     return transactions;
   }, [filterType, selectedMonth, selectedQuarter, selectedYear, transactions]);
 
-  // 총 수입 계산
-  const totalIncome = filteredTransactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0);
+  const calculateTotals = (entries) => {
+    const totals = entries.reduce(
+      (acc, t) => {
+        if (t.type === 'income') acc.income += t.amount;
+        else if (t.type === 'expense') acc.expense += t.amount;
+        return acc;
+      },
+      { income: 0, expense: 0 }
+    );
+    return { ...totals, balance: totals.income - totals.expense };
+  };
 
-  // 총 지출 계산
-  const totalExpense = filteredTransactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0);
+  const { income: totalIncome, expense: totalExpense, balance } = useMemo(
+    () => calculateTotals(filteredTransactions),
+    [filteredTransactions]
+  );
 
-  // 잔액 계산
-  const balance = totalIncome - totalExpense;
+  const overallTotals = useMemo(() => calculateTotals(transactions), [transactions]);
+  const isMonthlySummaryView = filterType === 'monthly';
 
   // 카테고리별 수입 통계
   const incomeByCategory = filteredTransactions
@@ -141,11 +183,18 @@ export default function Ledger() {
   const INCOME_COLORS = ['#667eea', '#764ba2', '#3b82f6', '#06b6d4'];
   const EXPENSE_COLORS = ['#ff6b6b', '#ff8c42', '#ff5e3a', '#ff9a56'];
 
-  // 월 목록 생성 (2025년)
-  const monthOptions = Array.from({ length: 12 }, (_, i) => {
-    const month = String(i + 1).padStart(2, '0');
-    return `2025-${month}`;
-  });
+  // 월 목록 생성 (데이터 기반)
+  const monthOptions = useMemo(() => {
+    const uniqueMonths = Array.from(
+      new Set(
+        transactions
+          .map((t) => getMonthKey(getDateValue(t)))
+          .filter(Boolean)
+      )
+    );
+    uniqueMonths.sort((a, b) => (a < b ? 1 : -1));
+    return uniqueMonths;
+  }, [transactions]);
 
   // 현재 필터 레이블
   const getFilterLabel = () => {
@@ -242,12 +291,15 @@ export default function Ledger() {
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
               >
-                <option value="">월 선택</option>
-                {monthOptions.map(month => (
-                  <option key={month} value={month}>
-                    {month.split('-')[0]}년 {parseInt(month.split('-')[1])}월
-                  </option>
-                ))}
+                <option value="">월 선택 (미선택 시 최신 데이터)</option>
+                {monthOptions.map(month => {
+                  const [year, monthNum] = month.split('-');
+                  return (
+                    <option key={month} value={month}>
+                      {year}년 {parseInt(monthNum, 10)}월
+                    </option>
+                  );
+                })}
               </select>
             )}
 
@@ -283,43 +335,83 @@ export default function Ledger() {
         </div>
 
         {/* 요약 카드 */}
-        <div className="ledger-summary">
-          <div className="summary-card summary-income">
-            <div className="summary-icon">💵</div>
-            <div className="summary-content">
-              <div className="summary-label">총 수입</div>
-              <div className="summary-value">₩{formatAmount(totalIncome)}</div>
-            </div>
-          </div>
-          <div className="summary-card summary-expense">
-            <div className="summary-icon">💸</div>
-            <div className="summary-content">
-              <div className="summary-label">총 지출</div>
-              <div className="summary-value">₩{formatAmount(totalExpense)}</div>
-            </div>
-          </div>
-          <div className="summary-card summary-balance">
-            <div className="summary-icon">💎</div>
-            <div className="summary-content">
-              <div className="summary-label">현재 잔액</div>
-              <div className={`summary-value ${balance >= 0 ? 'positive' : 'negative'}`}>
-                ₩{formatAmount(balance)}
+        <div className={`ledger-summary ${isMonthlySummaryView ? 'ledger-summary-nowrap' : ''}`}>
+          {isMonthlySummaryView ? (
+            <>
+              <div className="summary-card summary-income">
+                <div className="summary-icon">📥</div>
+                <div className="summary-content">
+                  <div className="summary-label">월 수입</div>
+                  <div className="summary-value">₩{formatAmount(totalIncome)}</div>
+                </div>
               </div>
-            </div>
-          </div>
+              <div className="summary-card summary-expense">
+                <div className="summary-icon">📤</div>
+                <div className="summary-content">
+                  <div className="summary-label">월 지출</div>
+                  <div className="summary-value">₩{formatAmount(totalExpense)}</div>
+                </div>
+              </div>
+              <div className="summary-card summary-balance">
+                <div className="summary-icon">🗓️</div>
+                <div className="summary-content">
+                  <div className="summary-label">월 잔액</div>
+                  <div className={`summary-value ${balance >= 0 ? 'positive' : 'negative'}`}>
+                    ₩{formatAmount(balance)}
+                  </div>
+                </div>
+              </div>
+              <div className="summary-card summary-total">
+                <div className="summary-icon">🏦</div>
+                <div className="summary-content">
+                  <div className="summary-label">총 현재 잔액</div>
+                  <div className={`summary-value ${overallTotals.balance >= 0 ? 'positive' : 'negative'}`}>
+                    ₩{formatAmount(overallTotals.balance)}
+                  </div>
+                  <p className="summary-subtext">이월 포함 잔액</p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="summary-card summary-income">
+                <div className="summary-icon">💵</div>
+                <div className="summary-content">
+                  <div className="summary-label">총 수입</div>
+                  <div className="summary-value">₩{formatAmount(totalIncome)}</div>
+                </div>
+              </div>
+              <div className="summary-card summary-expense">
+                <div className="summary-icon">💸</div>
+                <div className="summary-content">
+                  <div className="summary-label">총 지출</div>
+                  <div className="summary-value">₩{formatAmount(totalExpense)}</div>
+                </div>
+              </div>
+              <div className="summary-card summary-balance">
+                <div className="summary-icon">💎</div>
+                <div className="summary-content">
+                  <div className="summary-label">현재 잔액</div>
+                  <div className={`summary-value ${balance >= 0 ? 'positive' : 'negative'}`}>
+                    ₩{formatAmount(balance)}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* 차트 섹션 */}
         {(incomeChartData.length > 0 || expenseChartData.length > 0) && (
           <div className="charts-section">
             {incomeChartData.length > 0 && (
-            <div className="chart-card">
-              <h3 className="chart-title">📊 수입 상세</h3>
-              <div className="chart-container-modern">
-                <div className="chart-center-label">
-                  <div className="chart-center-title">총 수입</div>
-                  <div className="chart-center-value income">₩{formatAmount(totalIncome)}</div>
-                </div>
+              <div className="chart-card">
+                <h3 className="chart-title">📊 수입 상세</h3>
+                <div className="chart-container-modern">
+                  <div className="chart-center-label">
+                    <div className="chart-center-title">{isMonthlySummaryView ? '월 수입' : '총 수입'}</div>
+                    <div className="chart-center-value income">₩{formatAmount(totalIncome)}</div>
+                  </div>
                 <ResponsiveContainer width="100%" height={320}>
                   <PieChart>
                     <Pie
@@ -369,7 +461,7 @@ export default function Ledger() {
                       <div className="stat-amount income">₩{formatAmount(item.value)}</div>
                     </div>
                     <div className="stat-percentage">
-                      {((item.value / totalIncome) * 100).toFixed(1)}%
+                      {totalIncome ? ((item.value / totalIncome) * 100).toFixed(1) : '0.0'}%
                     </div>
                   </div>
                 ))}
@@ -378,13 +470,13 @@ export default function Ledger() {
             )}
 
             {expenseChartData.length > 0 && (
-            <div className="chart-card">
-              <h3 className="chart-title">📊 지출 상세</h3>
-              <div className="chart-container-modern">
-                <div className="chart-center-label">
-                  <div className="chart-center-title">총 지출</div>
-                  <div className="chart-center-value expense">₩{formatAmount(totalExpense)}</div>
-                </div>
+              <div className="chart-card">
+                <h3 className="chart-title">📊 지출 상세</h3>
+                <div className="chart-container-modern">
+                  <div className="chart-center-label">
+                    <div className="chart-center-title">{isMonthlySummaryView ? '월 지출' : '총 지출'}</div>
+                    <div className="chart-center-value expense">₩{formatAmount(totalExpense)}</div>
+                  </div>
                 <ResponsiveContainer width="100%" height={320}>
                   <PieChart>
                     <Pie
@@ -434,7 +526,7 @@ export default function Ledger() {
                       <div className="stat-amount expense">₩{formatAmount(item.value)}</div>
                     </div>
                     <div className="stat-percentage">
-                      {((item.value / totalExpense) * 100).toFixed(1)}%
+                      {totalExpense ? ((item.value / totalExpense) * 100).toFixed(1) : '0.0'}%
                     </div>
                   </div>
                 ))}
