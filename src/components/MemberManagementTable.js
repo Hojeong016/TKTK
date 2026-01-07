@@ -110,12 +110,8 @@ export default function MemberManagementTable() {
   };
 
   const handleSave = (memberId) => {
-    // 기존 멤버 데이터 찾기
-    const currentMember = data.find(m => m.id === memberId);
-
     // 수정된 데이터를 서버 DTO 형식으로 변환
     const updatedMemberData = {
-      name: currentMember?.name, // 기존 name 값 유지
       info: {
         discordname: editData.discordname,
         birthday: editData.birthday
@@ -124,8 +120,8 @@ export default function MemberManagementTable() {
         right: editData.rights
       },
       game: {
-        tier: toServerTier(editData.tier), // 프론트: "Ace" -> 서버: "ACE"
-        gamename: editData.gamename
+        tier: toServerTier(editData.tier) // 프론트: "Ace" -> 서버: "ACE"
+        // gamename은 업데이트 불가 필드이므로 서버로 보내지 않음
       },
       streaming: {
         soop: editData.soopUrl,
@@ -415,16 +411,7 @@ export default function MemberManagementTable() {
 
                   {/* 게임명 */}
                   <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editData.gamename || ''}
-                        onChange={(e) => handleInputChange('gamename', e.target.value)}
-                        className="table-input"
-                      />
-                    ) : (
-                      member.game?.gamename || '—'
-                    )}
+                    {member.game?.gamename || '—'}
                   </td>
 
                   {/* 티어 */}
