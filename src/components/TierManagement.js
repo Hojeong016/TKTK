@@ -25,8 +25,8 @@ const SCORE_FIELD_MAP = {
 };
 const TIER_OPTIONS = ['1tier', '2tier', '3tier', '4tier'];
 
-export default function TierManagement() {
-  const { data: members, isLoading: membersLoading } = useFetchItems({ requireAuth: true });
+export default function TierManagement({ version }) {
+  const { data: members, isLoading: membersLoading } = useFetchItems({ requireAuth: true, staleTime: 0, cacheTime: 0, version });
   const {
     data: tierList,
     isLoading: tiersLoading,

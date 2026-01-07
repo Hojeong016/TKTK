@@ -5,9 +5,15 @@ import memberService from './memberService';
  * 멤버 목록 조회 훅
  * @returns {QueryResult} React Query 결과
  */
-export function useFetchItems({ requireAuth = false, endpoint = '/api/members' } = {}) {
+export function useFetchItems({
+  requireAuth = false,
+  endpoint = '/api/members',
+  staleTime = 1000 * 60,
+  cacheTime,
+  version
+} = {}) {
   return useQuery({
-    queryKey: ['items', endpoint, requireAuth],
+    queryKey: ['items', endpoint, requireAuth, version],
     queryFn: async () => {
       // 환경에 따라 로컬 또는 서버 API 사용
       const isDevelopment = process.env.NODE_ENV === 'development';
@@ -21,7 +27,8 @@ export function useFetchItems({ requireAuth = false, endpoint = '/api/members' }
       // 서버 API 사용
       return await memberService.getItems({ auth: requireAuth, endpoint });
     },
-    staleTime: 1000 * 60, // 1분
+    staleTime,
+    cacheTime
   });
 }
 

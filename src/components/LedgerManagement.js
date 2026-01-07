@@ -9,7 +9,7 @@ import ConfirmModal from './ConfirmModal';
  * LedgerManagement - 공금 입출금 내역 관리 컴포넌트
  * 관리자가 거래 내역을 추가/수정/삭제할 수 있는 관리 페이지
  */
-export default function LedgerManagement() {
+export default function LedgerManagement({ version }) {
   const queryClient = useQueryClient();
   const { toast, showToast } = useToast();
 

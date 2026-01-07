@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import AchievementModal from './AchievementModal';
 import '../styles/achievement-management.css';
 
-export default function AchievementManagement() {
+export default function AchievementManagement({ version }) {
   const [achievements, setAchievements] = useState([
     // 더미 데이터
     {

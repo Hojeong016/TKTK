@@ -13,8 +13,8 @@ import Toast from './Toast';
 /**
  * BlacklistManagement - 블랙리스트 및 경고 관리
  */
-export default function BlacklistManagement() {
-  const { data: members, isLoading, isError } = useFetchItems({ requireAuth: true });
+export default function BlacklistManagement({ version }) {
+  const { data: members, isLoading, isError } = useFetchItems({ requireAuth: true, staleTime: 0, cacheTime: 0, version });
   const {
     data: blacklistEntries,
     isLoading: blacklistLoading,

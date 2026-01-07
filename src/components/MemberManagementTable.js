@@ -43,8 +43,8 @@ const getLevelCodeLabel = (levelCode) => {
  * MemberManagementTable - 관리자용 멤버 관리 테이블
  * 수정/삭제 기능 포함
  */
-export default function MemberManagementTable() {
-  const { data, isLoading, isError } = useFetchItems({ requireAuth: true });
+export default function MemberManagementTable({ version }) {
+  const { data, isLoading, isError } = useFetchItems({ requireAuth: true, staleTime: 0, cacheTime: 0, version });
   const { rightsConfig } = useStore();
   const [editingId, setEditingId] = React.useState(null);
   const [editData, setEditData] = React.useState({});
@@ -99,6 +99,11 @@ export default function MemberManagementTable() {
     });
   };
 
+  React.useEffect(() => {
+    setEditingId(null);
+    setEditData({});
+  }, [version]);
+
   const handleRightToggle = (rightValue) => {
     setEditData(prev => {
       const currentRights = prev.rights || [];
@@ -120,8 +125,8 @@ export default function MemberManagementTable() {
         right: editData.rights
       },
       game: {
-        tier: toServerTier(editData.tier) // 프론트: "Ace" -> 서버: "ACE"
-        // gamename은 업데이트 불가 필드이므로 서버로 보내지 않음
+        tier: toServerTier(editData.tier), // 프론트: "Ace" -> 서버: "ACE"
+        gamename: editData.gamename // 입력은 비활성화이지만 서버에는 기존 값 유지
       },
       streaming: {
         soop: editData.soopUrl,

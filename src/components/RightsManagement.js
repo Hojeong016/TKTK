@@ -7,7 +7,7 @@ import ConfirmModal from './ConfirmModal';
 /**
  * RightsManagement - 권한 설정 CRUD 관리
  */
-export default function RightsManagement() {
+export default function RightsManagement({ version }) {
   const { rightsConfig, addRight, updateRight, deleteRight } = useStore();
   const [editingId, setEditingId] = React.useState(null);
   const [editData, setEditData] = React.useState(null);
