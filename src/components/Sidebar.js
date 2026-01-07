@@ -34,6 +34,13 @@ export default function Sidebar() {
           ))}
           {userIsAdmin && <li><NavLink to="/settings">Settings</NavLink></li>}
         </ul>
+        {memberOnly && (
+          <div className="sidebar-info-box">
+            <p>
+              클랜 가입을 완료하면 랭킹, 리포트, 장부 등 다양한 기능을 이용할 수 있어요.
+            </p>
+          </div>
+        )}
       </nav>
     </aside>
   );
