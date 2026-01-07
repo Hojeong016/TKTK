@@ -10,11 +10,11 @@ const memberService = {
    * 모든 멤버 목록 조회
    * @returns {Promise<Member[]>} 멤버 목록
    */
-  async getItems({ auth = false } = {}) {
+  async getItems({ auth = false, endpoint = '/api/members' } = {}) {
     try {
       // 서버 API 호출
-     const res = await apiClient.get('/api/members', { auth });
-     return res.data;
+      const res = await apiClient.get(endpoint, { auth });
+      return res.data;
     } catch (error) {
       console.error('Failed to fetch members:', error);
       throw error;

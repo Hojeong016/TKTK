@@ -22,7 +22,7 @@ const getLevelCodeLabel = (levelCode) => {
  * ClanStatusManagement - 클랜 가입 승인/거절/해제 전용 관리 컴포넌트
  */
 export default function ClanStatusManagement() {
-  const { data, isLoading, isError } = useFetchItems({ requireAuth: true });
+  const { data, isLoading, isError } = useFetchItems({ requireAuth: true, endpoint: '/api/members/all' });
   const [clanActionTarget, setClanActionTarget] = React.useState(null); // { member, action: 'approve'|'reject'|'remove' }
   const [approveModalData, setApproveModalData] = React.useState(null); // { member, tier, level }
   const { toast, showToast } = useToast();

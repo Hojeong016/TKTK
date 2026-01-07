@@ -49,6 +49,10 @@ export default function Profile() {
   const [statsError, setStatsError] = useState(null);
   const [syncRetrying, setSyncRetrying] = useState(false);
   const [gameNameInput, setGameNameInput] = useState('');
+  const [showGameNameModal, setShowGameNameModal] = useState(false);
+  const [modalGameName, setModalGameName] = useState('');
+  const [gameNameModalSubmitting, setGameNameModalSubmitting] = useState(false);
+  const [modalGameNameError, setModalGameNameError] = useState('');
   const memberId = user?.id;
 
   useEffect(() => {
@@ -83,6 +87,54 @@ export default function Profile() {
       setError('프로필을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const retryGameSyncRequest = async (targetGameName, { loadingSetter, successMessage } = {}) => {
+    if (!targetGameName) return false;
+
+    loadingSetter?.(true);
+    try {
+      await memberService.retryGameSync(targetGameName);
+      await fetchUserProfile();
+      alert(successMessage || '게임 연동을 다시 시도했습니다. 잠시 후 상태를 확인해주세요.');
+      return true;
+    } catch (err) {
+      console.error('게임 연동 재시도 실패:', err);
+      alert('연동 재시도에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      return false;
+    } finally {
+      loadingSetter?.(false);
+    }
+  };
+
+  const openGameNameChangeModal = () => {
+    setModalGameName(user?.game?.gamename || '');
+    setModalGameNameError('');
+    setShowGameNameModal(true);
+  };
+
+  const closeGameNameChangeModal = () => {
+    if (gameNameModalSubmitting) return;
+    setShowGameNameModal(false);
+    setModalGameNameError('');
+  };
+
+  const handleGameNameModalSubmit = async () => {
+    const targetGameName = modalGameName.trim();
+    if (!targetGameName) {
+      setModalGameNameError('PUBG 닉네임을 입력해주세요.');
+      return;
+    }
+
+    const success = await retryGameSyncRequest(targetGameName, {
+      loadingSetter: setGameNameModalSubmitting,
+      successMessage: '새 닉네임으로 연동을 다시 시도했습니다. 잠시 후 상태를 확인해주세요.'
+    });
+
+    if (success) {
+      setShowGameNameModal(false);
+      setGameNameInput(targetGameName);
     }
   };
 
@@ -216,6 +268,14 @@ export default function Profile() {
     return tierColors[tier] || '#6b7280';
   };
 
+  const formatSyncError = (reason) => {
+    if (!reason) return '';
+    if (reason.includes('404 Not Found')) {
+      return '게임 내에서 존재하지 않는 닉네임입니다. 공백과 대/소문자를 다시 확인해주세요.';
+    }
+    return reason;
+  };
+
   const getClanStatusInfo = (status) => {
     switch (status) {
       case 'APPROVED':
@@ -260,17 +320,10 @@ export default function Profile() {
       return;
     }
 
-    try {
-      setSyncRetrying(true);
-      await memberService.retryGameSync(targetGameName);
-      await fetchUserProfile();
-      alert('게임 연동을 다시 시도했습니다. 잠시 후 상태를 확인해주세요.');
-    } catch (err) {
-      console.error('게임 연동 재시도 실패:', err);
-      alert('연동 재시도에 실패했습니다. 잠시 후 다시 시도해주세요.');
-    } finally {
-      setSyncRetrying(false);
-    }
+    await retryGameSyncRequest(targetGameName, {
+      loadingSetter: setSyncRetrying,
+      successMessage: '게임 연동을 다시 시도했습니다. 잠시 후 상태를 확인해주세요.'
+    });
   };
 
   if (loading) {
@@ -425,23 +478,32 @@ export default function Profile() {
                   </div>
                   <div className="profile-info-item">
                     <p className="profile-info-label">연동 상태</p>
-                    <span
-                      className="profile-status-badge"
-                      style={{
-                        background: syncStatus.bg,
-                        borderColor: syncStatus.color,
-                        color: syncStatus.color
-                      }}
-                    >
-                      <div
-                        className="profile-status-indicator"
-                        style={{ background: syncStatus.color }}
-                      />
-                      {syncStatus.text}
-                    </span>
+                    <div className="profile-sync-row">
+                      <span
+                        className="profile-status-badge"
+                        style={{
+                          background: syncStatus.bg,
+                          borderColor: syncStatus.color,
+                          color: syncStatus.color
+                        }}
+                      >
+                        <div
+                          className="profile-status-indicator"
+                          style={{ background: syncStatus.color }}
+                        />
+                        {syncStatus.text}
+                      </span>
+                      <button
+                        type="button"
+                        className="profile-change-button"
+                        onClick={openGameNameChangeModal}
+                      >
+                        변경하기
+                      </button>
+                    </div>
                     {user.game?.syncStatus === 'FAILED' && user.game?.failReason && (
                       <p className="profile-sync-error">
-                        {user.game.failReason}
+                        {formatSyncError(user.game.failReason)}
                       </p>
                     )}
                     {user.game?.syncStatus === 'FAILED' && (
@@ -736,10 +798,69 @@ export default function Profile() {
                 </div>
               )}
             </div>
-          )}
-        </motion.div>
-      </div>
-    </Layout>
+        )}
+      </motion.div>
+      {showGameNameModal && (
+        <div
+          className="profile-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          onClick={closeGameNameChangeModal}
+        >
+          <div
+            className="profile-modal"
+            role="document"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="profile-modal-close"
+              aria-label="게임 닉네임 변경 모달 닫기"
+              onClick={closeGameNameChangeModal}
+            >
+              ×
+            </button>
+            <h3 className="profile-modal-title">게임 닉네임 변경</h3>
+            <p className="profile-modal-description">
+              PUBG 닉네임을 수정하고 연동을 다시 시도합니다. 5~10분 후 연동 상태를 다시 확인해주세요.
+            </p>
+            <input
+              className="profile-modal-input"
+              value={modalGameName}
+              onChange={(e) => {
+                setModalGameName(e.target.value);
+                if (modalGameNameError) {
+                  setModalGameNameError('');
+                }
+              }}
+              placeholder="새 PUBG 닉네임을 입력하세요"
+            />
+            {modalGameNameError && (
+              <p className="profile-modal-error">{modalGameNameError}</p>
+            )}
+            <div className="profile-modal-actions">
+              <button
+                type="button"
+                className="profile-modal-button profile-modal-cancel"
+                onClick={closeGameNameChangeModal}
+                disabled={gameNameModalSubmitting}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="profile-modal-button profile-modal-submit"
+                onClick={handleGameNameModalSubmit}
+                disabled={gameNameModalSubmitting}
+              >
+                {gameNameModalSubmitting ? '변경 중...' : '변경 및 재연동'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  </Layout>
   );
 }
 
