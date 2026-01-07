@@ -110,8 +110,12 @@ export default function MemberManagementTable() {
   };
 
   const handleSave = (memberId) => {
+    // 기존 멤버 데이터 찾기
+    const currentMember = data.find(m => m.id === memberId);
+
     // 수정된 데이터를 서버 DTO 형식으로 변환
     const updatedMemberData = {
+      name: currentMember?.name, // 기존 name 값 유지
       info: {
         discordname: editData.discordname,
         birthday: editData.birthday
