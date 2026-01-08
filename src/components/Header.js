@@ -41,6 +41,8 @@ export default function Header() {
     logout();
     setUser(null);
     setShowUserMenu(false);
+    // 홈으로 리다이렉트하고 페이지 완전히 새로고침 (캐시 제거)
+    window.location.href = '/';
   };
 
   const handleMyPage = () => {

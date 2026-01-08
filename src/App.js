@@ -1,5 +1,6 @@
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
 import Home from './pages/Home';
 import Tier from './pages/Tier';
 import PubgRank from './pages/PubgRank';
@@ -12,8 +13,16 @@ import SignupComplete from './pages/SignupComplete';
 import Profile from './pages/Profile';
 import GameStatsDemo from './pages/GameStatsDemo';
 import GameStatsAdvanced from './pages/GameStatsAdvanced';
+import useStore from './store/useStore';
 
 function App() {
+  const loadRightsConfig = useStore(state => state.loadRightsConfig);
+
+  // 앱 시작 시 권한 설정 로드 (모든 사용자가 권한 배지를 볼 수 있도록)
+  useEffect(() => {
+    loadRightsConfig();
+  }, [loadRightsConfig]);
+
   return (
     <Routes>
       <Route path="/" element={<Home />} />

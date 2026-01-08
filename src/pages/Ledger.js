@@ -1,11 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import ledgerService from '../api/ledgerService';
+import { canAccessRestrictedPages } from '../utils/discord-auth';
 import '../styles/ledger.css';
 
 export default function Ledger() {
+  const navigate = useNavigate();
+  const hasAccess = canAccessRestrictedPages();
+
   // 필터 상태
   const [filterType, setFilterType] = useState('all'); // 'all', 'monthly', 'quarterly'
   const [selectedMonth, setSelectedMonth] = useState(''); // '2025-01' 형식
@@ -195,6 +200,19 @@ export default function Ledger() {
     uniqueMonths.sort((a, b) => (a < b ? 1 : -1));
     return uniqueMonths;
   }, [transactions]);
+
+  // 권한 체크 (MEMBER만 있는 사용자나 로그인 안한 사용자는 접근 불가)
+  useEffect(() => {
+    if (!hasAccess) {
+      alert('이 페이지에 접근할 수 있는 권한이 없습니다.');
+      navigate('/');
+    }
+  }, [hasAccess, navigate]);
+
+  // 권한이 없는 경우 렌더링하지 않음
+  if (!hasAccess) {
+    return null;
+  }
 
   // 현재 필터 레이블
   const getFilterLabel = () => {

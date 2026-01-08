@@ -3,6 +3,7 @@ import { useFetchItems, useUpdateItem, useDeleteItem } from '../api/useFetch';
 import { getTierIcon } from '../constants/tiers';
 import useStore from '../store/useStore';
 import AddMemberModal from './AddMemberModal';
+import EditMemberModal from './EditMemberModal';
 import { extractStreamingUrl } from '../utils/streamingUrl';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
@@ -46,8 +47,8 @@ const getLevelCodeLabel = (levelCode) => {
 export default function MemberManagementTable({ version }) {
   const { data, isLoading, isError } = useFetchItems({ requireAuth: true, staleTime: 0, cacheTime: 0, version });
   const { rightsConfig } = useStore();
-  const [editingId, setEditingId] = React.useState(null);
-  const [editData, setEditData] = React.useState({});
+  const [editModalOpen, setEditModalOpen] = React.useState(false);
+  const [editingMember, setEditingMember] = React.useState(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [deleteTarget, setDeleteTarget] = React.useState(null);
   const [retryingId, setRetryingId] = React.useState(null);
@@ -59,93 +60,48 @@ export default function MemberManagementTable({ version }) {
   const deleteMutation = useDeleteItem();
 
   const handleEdit = (member) => {
-    setEditingId(member.id);
-    const rightValue = member.discord?.right || [];
-    const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
-
-    // birthday 날짜 형식 변환 (ISO 형식이면 YYYY-MM-DD만 추출)
-    let birthdayValue = member.info?.birthday || '';
-    if (birthdayValue && birthdayValue.includes('T')) {
-      birthdayValue = birthdayValue.split('T')[0];
-    }
-
-    // StreamingUrl 객체에서 URL 문자열 추출
-    const soopUrl = extractStreamingUrl(member.streaming?.soop);
-    const chzzkUrl = extractStreamingUrl(member.streaming?.chzzk);
-
-    // 티어 값 정규화 (서버: "ACE" -> 프론트: "Ace")
-    const normalizedTier = normalizeTier(member.game?.tier);
-
-    setEditData({
-      discordname: member.info?.discordname || '',
-      birthday: birthdayValue,
-      rights: rights,
-      gamename: member.game?.gamename || '',
-      tier: normalizedTier,
-      soopUrl: soopUrl,
-      chzzkUrl: chzzkUrl,
-      staffName: member.memberofthestaff?.name || '',
-      tktkTier: member.tktkTier || ''
-    });
-
-    // 디버깅을 위한 로그
-    console.log('Editing member:', {
-      id: member.id,
-      name: member.name,
-      rawTier: member.game?.tier,
-      normalizedTier: normalizedTier,
-      rights: rights,
-      birthday: birthdayValue
-    });
+    setEditingMember(member);
+    setEditModalOpen(true);
   };
 
   React.useEffect(() => {
-    setEditingId(null);
-    setEditData({});
+    setEditModalOpen(false);
+    setEditingMember(null);
   }, [version]);
 
-  const handleRightToggle = (rightValue) => {
-    setEditData(prev => {
-      const currentRights = prev.rights || [];
-      const newRights = currentRights.includes(rightValue)
-        ? currentRights.filter(r => r !== rightValue)
-        : [...currentRights, rightValue];
-      return { ...prev, rights: newRights };
-    });
-  };
+  const handleSave = (formData) => {
+    if (!editingMember) return;
 
-  const handleSave = (memberId) => {
     // 수정된 데이터를 서버 DTO 형식으로 변환
     const updatedMemberData = {
       info: {
-        discordname: editData.discordname,
-        birthday: editData.birthday
+        discordname: formData.discordname,
+        birthday: formData.birthday
       },
       discord: {
-        right: editData.rights
+        right: formData.rights
       },
       game: {
-        tier: toServerTier(editData.tier), // 프론트: "Ace" -> 서버: "ACE"
-        gamename: editData.gamename // 입력은 비활성화이지만 서버에는 기존 값 유지
+        tier: toServerTier(formData.tier) // 프론트: "Ace" -> 서버: "ACE"
       },
       streaming: {
-        soop: editData.soopUrl,
-        chzzk: editData.chzzkUrl
+        soop: formData.soopUrl,
+        chzzk: formData.chzzkUrl
       },
       memberofthestaff: {
-        name: editData.staffName
+        name: formData.staffName
       },
-      tktkTier: editData.tktkTier || null
+      tktkTier: formData.tktkTier || null
     };
 
     // API 호출
     updateMutation.mutate(
-      { id: memberId, data: updatedMemberData },
+      { id: editingMember.id, data: updatedMemberData },
       {
         onSuccess: () => {
           showToast('success', '멤버 정보가 성공적으로 수정되었습니다.');
-          setEditingId(null);
-          setEditData({});
+          setEditModalOpen(false);
+          setEditingMember(null);
         },
         onError: (error) => {
           console.error('Failed to update member:', error);
@@ -155,9 +111,11 @@ export default function MemberManagementTable({ version }) {
     );
   };
 
-  const handleCancel = () => {
-    setEditingId(null);
-    setEditData({});
+  const handleCloseEditModal = () => {
+    if (!updateMutation.isPending) {
+      setEditModalOpen(false);
+      setEditingMember(null);
+    }
   };
 
   const handleDelete = (member) => {
@@ -187,7 +145,8 @@ export default function MemberManagementTable({ version }) {
 
     setRetryingId(member.id);
     try {
-      await memberService.retryGameSync(gameName);
+      // 관리자가 특정 멤버의 게임 정보를 재동기화
+      await memberService.retryGameSyncForMember(member.id, gameName);
       showToast('success', '게임 정보 연동을 재시도합니다. 게임 이름을 다시 한번 확인해주세요');
 
       // 3초 후 데이터 새로고침
@@ -200,13 +159,6 @@ export default function MemberManagementTable({ version }) {
       showToast('error', `게임 정보 연동 재시도에 실패했습니다: ${error.message || '알 수 없는 오류'}`);
       setRetryingId(null);
     }
-  };
-
-  const handleInputChange = (field, value) => {
-    setEditData(prev => ({
-      ...prev,
-      [field]: value
-    }));
   };
 
   const getClanStatusBadge = (status) => {
@@ -259,7 +211,6 @@ export default function MemberManagementTable({ version }) {
           </thead>
           <tbody>
             {data.map((member) => {
-              const isEditing = editingId === member.id;
               const syncStatus = member.game?.syncStatus;
               const isSyncFailed = syncStatus === 'FAILED';
               const isSyncPending = syncStatus === 'PENDING';
@@ -268,8 +219,7 @@ export default function MemberManagementTable({ version }) {
 
               // 행 클래스 결정
               let rowClass = '';
-              if (isEditing) rowClass = 'editing-row';
-              else if (isSyncFailed) rowClass = 'sync-failed-row';
+              if (isSyncFailed) rowClass = 'sync-failed-row';
               else if (isSyncPending) rowClass = 'sync-pending-row';
               else if (isRequesting) rowClass = 'sync-requesting-row';
 
@@ -277,67 +227,46 @@ export default function MemberManagementTable({ version }) {
                 <tr key={member.id} className={rowClass}>
                   {/* 작업 버튼 */}
                   <td className="action-cell">
-                    {isEditing ? (
-                      <div className="action-buttons">
+                    <div className="action-buttons">
+                      {(needsSync || isRequesting) && (
                         <button
-                          className="btn-save"
-                          onClick={() => handleSave(member.id)}
-                          disabled={updateMutation.isPending}
-                          title="저장"
+                          className={
+                            isRequesting
+                              ? 'btn-retry btn-retry-requesting'
+                              : isSyncFailed
+                                ? 'btn-retry btn-retry-failed'
+                                : 'btn-retry btn-retry-pending'
+                          }
+                          onClick={() => handleRetry(member)}
+                          disabled={retryingId === member.id || isRequesting}
+                          title={
+                            isRequesting
+                              ? '게임 정보 연동 중...\n잠시만 기다려주세요.'
+                              : isSyncFailed
+                                ? `게임 정보 연동 재시도${member.game?.failReason ? `\n실패 사유: ${member.game.failReason}` : ''}${member.game?.retryCount ? `\n재시도 횟수: ${member.game.retryCount}회` : ''}`
+                                : '게임 정보 연동 시작\n아직 PUBG 계정과 연동되지 않았습니다.'
+                          }
                         >
-                          {updateMutation.isPending ? '⏳' : '✅'}
+                          {isRequesting ? '⏳' : (retryingId === member.id ? '⏳' : (isSyncFailed ? '🔄' : '▶️'))}
                         </button>
-                        <button
-                          className="btn-cancel"
-                          onClick={handleCancel}
-                          disabled={updateMutation.isPending}
-                          title="취소"
-                        >
-                          ❌
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="action-buttons">
-                        {(needsSync || isRequesting) && (
-                          <button
-                            className={
-                              isRequesting
-                                ? 'btn-retry btn-retry-requesting'
-                                : isSyncFailed
-                                  ? 'btn-retry btn-retry-failed'
-                                  : 'btn-retry btn-retry-pending'
-                            }
-                            onClick={() => handleRetry(member)}
-                            disabled={retryingId === member.id || isRequesting}
-                            title={
-                              isRequesting
-                                ? '게임 정보 연동 중...\n잠시만 기다려주세요.'
-                                : isSyncFailed
-                                  ? `게임 정보 연동 재시도${member.game?.failReason ? `\n실패 사유: ${member.game.failReason}` : ''}${member.game?.retryCount ? `\n재시도 횟수: ${member.game.retryCount}회` : ''}`
-                                  : '게임 정보 연동 시작\n아직 PUBG 계정과 연동되지 않았습니다.'
-                            }
-                          >
-                            {isRequesting ? '⏳' : (retryingId === member.id ? '⏳' : (isSyncFailed ? '🔄' : '▶️'))}
-                          </button>
-                        )}
-                        <button
-                          className="btn-edit"
-                          onClick={() => handleEdit(member)}
-                          disabled={deleteMutation.isPending || retryingId === member.id || isRequesting}
-                          title="수정"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          className="btn-delete"
-                          onClick={() => handleDelete(member)}
-                          disabled={deleteMutation.isPending || retryingId === member.id || isRequesting}
-                          title="삭제"
-                        >
-                          {deleteMutation.isPending ? '⏳' : '🗑️'}
-                        </button>
-                      </div>
-                    )}
+                      )}
+                      <button
+                        className="btn-edit"
+                        onClick={() => handleEdit(member)}
+                        disabled={deleteMutation.isPending || retryingId === member.id || isRequesting}
+                        title="수정"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleDelete(member)}
+                        disabled={deleteMutation.isPending || retryingId === member.id || isRequesting}
+                        title="삭제"
+                      >
+                        {deleteMutation.isPending ? '⏳' : '🗑️'}
+                      </button>
+                    </div>
                   </td>
 
                   {/* Name */}
@@ -347,71 +276,38 @@ export default function MemberManagementTable({ version }) {
 
                   {/* Discord 닉네임 */}
                   <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editData.discordname || ''}
-                        onChange={(e) => handleInputChange('discordname', e.target.value)}
-                        className="table-input"
-                      />
-                    ) : (
-                      member.info?.discordname || '—'
-                    )}
+                    {member.info?.discordname || '—'}
                   </td>
 
                   {/* 생일 */}
                   <td className="birthday-cell">
-                    {isEditing ? (
-                      <input
-                        type="date"
-                        value={editData.birthday || ''}
-                        onChange={(e) => handleInputChange('birthday', e.target.value)}
-                        className="table-input"
-                      />
-                    ) : (
-                      member.info?.birthday || '—'
-                    )}
+                    {member.info?.birthday || '—'}
                   </td>
 
                   {/* 권한 */}
                   <td>
-                    {isEditing ? (
-                      <div className="rights-checkboxes">
-                        {rightsConfig.map(rightOpt => (
-                          <label key={rightOpt.key} className="checkbox-label">
-                            <input
-                              type="checkbox"
-                              checked={(editData.rights || []).includes(rightOpt.key)}
-                              onChange={() => handleRightToggle(rightOpt.key)}
-                            />
-                            <span>{rightOpt.label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="rights-display">
-                        {(() => {
-                          const rightValue = member.discord?.right || [];
-                          const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
-                          return rights.map((rightKey, idx) => {
-                            const config = rightsConfig.find(rc => rc.key === rightKey);
-                            if (!config) return null;
-                            return (
-                              <span
-                                key={idx}
-                                className="right-badge-small"
-                                style={{
-                                  color: config.color,
-                                  backgroundColor: config.bgColor
-                                }}
-                              >
-                                {config.label}
-                              </span>
-                            );
-                          });
-                        })()}
-                      </div>
-                    )}
+                    <div className="rights-display">
+                      {(() => {
+                        const rightValue = member.discord?.right || [];
+                        const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
+                        return rights.map((rightKey, idx) => {
+                          const config = rightsConfig.find(rc => rc.key === rightKey);
+                          if (!config) return null;
+                          return (
+                            <span
+                              key={idx}
+                              className="right-badge-small"
+                              style={{
+                                color: config.color,
+                                backgroundColor: config.bgColor
+                              }}
+                            >
+                              {config.label}
+                            </span>
+                          );
+                        });
+                      })()}
+                    </div>
                   </td>
 
                   {/* 게임명 */}
@@ -421,30 +317,10 @@ export default function MemberManagementTable({ version }) {
 
                   {/* 티어 */}
                   <td>
-                    {isEditing ? (
-                      <select
-                        value={editData.tier || ''}
-                        onChange={(e) => handleInputChange('tier', e.target.value)}
-                        className="table-select"
-                      >
-                        <option value="">선택</option>
-                        <option value="Conqueror">Conqueror</option>
-                        <option value="Master">Master</option>
-                        <option value="Ace">Ace</option>
-                        <option value="Crown">Crown</option>
-                        <option value="Diamond">Diamond</option>
-                        <option value="Platinum">Platinum</option>
-                        <option value="Gold">Gold</option>
-                        <option value="Silver">Silver</option>
-                        <option value="Bronze">Bronze</option>
-                        <option value="Unranked">Unranked</option>
-                      </select>
-                    ) : (
-                      <div className="tier-cell">
-                        {getTierIcon(member.game?.tier, { className: 'tier-icon-tiny' })}
-                        <span>{member.game?.tier || 'Unranked'}</span>
-                      </div>
-                    )}
+                    <div className="tier-cell">
+                      {getTierIcon(member.game?.tier, { className: 'tier-icon-tiny' })}
+                      <span>{member.game?.tier || 'Unranked'}</span>
+                    </div>
                   </td>
 
                   {/* TKTK 티어 */}
@@ -483,60 +359,31 @@ export default function MemberManagementTable({ version }) {
 
                   {/* Soop URL */}
                   <td className="url-cell">
-                    {isEditing ? (
-                      <input
-                        type="url"
-                        value={editData.soopUrl || ''}
-                        onChange={(e) => handleInputChange('soopUrl', e.target.value)}
-                        className="table-input table-input-url"
-                        placeholder="URL"
-                      />
-                    ) : (
-                      (() => {
-                        const soopUrl = extractStreamingUrl(member.streaming?.soop);
-                        return soopUrl ? (
-                          <a href={soopUrl} target="_blank" rel="noreferrer" className="url-link" title={soopUrl}>
-                            링크
-                          </a>
-                        ) : '—';
-                      })()
-                    )}
+                    {(() => {
+                      const soopUrl = extractStreamingUrl(member.streaming?.soop);
+                      return soopUrl ? (
+                        <a href={soopUrl} target="_blank" rel="noreferrer" className="url-link" title={soopUrl}>
+                          링크
+                        </a>
+                      ) : '—';
+                    })()}
                   </td>
 
                   {/* Chzzk URL */}
                   <td className="url-cell">
-                    {isEditing ? (
-                      <input
-                        type="url"
-                        value={editData.chzzkUrl || ''}
-                        onChange={(e) => handleInputChange('chzzkUrl', e.target.value)}
-                        className="table-input table-input-url"
-                        placeholder="URL"
-                      />
-                    ) : (
-                      (() => {
-                        const chzzkUrl = extractStreamingUrl(member.streaming?.chzzk);
-                        return chzzkUrl ? (
-                          <a href={chzzkUrl} target="_blank" rel="noreferrer" className="url-link" title={chzzkUrl}>
-                            링크
-                          </a>
-                        ) : '—';
-                      })()
-                    )}
+                    {(() => {
+                      const chzzkUrl = extractStreamingUrl(member.streaming?.chzzk);
+                      return chzzkUrl ? (
+                        <a href={chzzkUrl} target="_blank" rel="noreferrer" className="url-link" title={chzzkUrl}>
+                          링크
+                        </a>
+                      ) : '—';
+                    })()}
                   </td>
 
                   {/* 담당 스태프 */}
                   <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editData.staffName || ''}
-                        onChange={(e) => handleInputChange('staffName', e.target.value)}
-                        className="table-input"
-                      />
-                    ) : (
-                      member.memberofthestaff?.name || '—'
-                    )}
+                    {member.memberofthestaff?.name || '—'}
                   </td>
                 </tr>
               );
@@ -545,6 +392,15 @@ export default function MemberManagementTable({ version }) {
         </table>
       </div>
       )}
+
+      <EditMemberModal
+        open={editModalOpen}
+        member={editingMember}
+        onClose={handleCloseEditModal}
+        onSave={handleSave}
+        isSaving={updateMutation.isPending}
+      />
+
       <ConfirmModal
         open={!!deleteTarget}
         title="멤버 삭제"

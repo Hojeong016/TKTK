@@ -179,3 +179,29 @@ export const hasPermission = (permission) => {
 export const isAdmin = () => {
   return hasPermission('ADMIN');
 };
+
+/**
+ * MEMBER 권한만 있는지 확인 (MEMBER만 있으면 true)
+ * @returns {boolean}
+ */
+export const isMemberOnly = () => {
+  const user = getUser();
+  if (!user) return false;
+
+  const rightValue = user.discord?.right || [];
+  const rights = Array.isArray(rightValue) ? rightValue : [rightValue];
+
+  // rights 배열에 'member'만 있고 다른 권한이 없으면 true
+  return rights.length === 1 && rights[0] === 'member';
+};
+
+/**
+ * 페이지 접근 권한 확인 (CLANMEMBER, ADMIN 등만 접근 가능)
+ * MEMBER 권한만 있는 사용자는 접근 불가
+ * @returns {boolean}
+ */
+export const canAccessRestrictedPages = () => {
+  if (!isAuthenticated()) return false;
+  if (isMemberOnly()) return false;
+  return true;
+};

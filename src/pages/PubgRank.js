@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import useRankStream from '../hooks/useRankStream';
 import { formatSecondsToClock, formatSecondsToDurationLabel, formatTimestamp } from '../utils/time';
+import { canAccessRestrictedPages } from '../utils/discord-auth';
 import '../styles/pubg-rank.css';
 
 const DEFAULT_COUNT = 20;
@@ -50,7 +52,9 @@ const getPlayerInitial = (player) => {
 };
 
 export default function PubgRank() {
+  const navigate = useNavigate();
   const count = DEFAULT_COUNT;
+  const hasAccess = canAccessRestrictedPages();
 
   const {
     rankings,
@@ -74,6 +78,19 @@ export default function PubgRank() {
   }, [rankings]);
 
   const streamLabel = STREAM_STATUS_LABELS[streamStatus] ?? STREAM_STATUS_LABELS.idle;
+
+  // 권한 체크 (MEMBER만 있는 사용자나 로그인 안한 사용자는 접근 불가)
+  React.useEffect(() => {
+    if (!hasAccess) {
+      alert('이 페이지에 접근할 수 있는 권한이 없습니다.');
+      navigate('/');
+    }
+  }, [hasAccess, navigate]);
+
+  // 권한이 없는 경우 렌더링하지 않음
+  if (!hasAccess) {
+    return null;
+  }
 
   const renderTableBody = () => (
     <tbody>

@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import StatsCard from '../components/StatsCard';
 import { useFetchTiers, useFetchTierDetail } from '../api/useFetchTier';
+import { canAccessRestrictedPages } from '../utils/discord-auth';
 import '../styles/tier.css';
 
 const LEVELS = ['상', '중', '하'];
@@ -41,6 +43,9 @@ const formatMemberLabel = (member) => {
 };
 
 export default function Tier() {
+  const navigate = useNavigate();
+  const hasAccess = canAccessRestrictedPages();
+
   const {
     data: tiers,
     isLoading: tiersLoading,
@@ -147,6 +152,19 @@ export default function Tier() {
     }
     return LEVELS.reduce((sum, level) => sum + tierMembers[level].length, 0);
   }, [selectedTier, tierDetail, tierMembers]);
+
+  // 권한 체크 (MEMBER만 있는 사용자나 로그인 안한 사용자는 접근 불가)
+  React.useEffect(() => {
+    if (!hasAccess) {
+      alert('이 페이지에 접근할 수 있는 권한이 없습니다.');
+      navigate('/');
+    }
+  }, [hasAccess, navigate]);
+
+  // 권한이 없는 경우 렌더링하지 않음
+  if (!hasAccess) {
+    return null;
+  }
 
   const handleTierClick = (tierKey) => {
     setSelectedTierKey((prev) => (prev === tierKey ? null : tierKey));

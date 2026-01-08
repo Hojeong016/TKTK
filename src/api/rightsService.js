@@ -2,7 +2,7 @@ import apiClient from './apiClient';
 
 const rightsService = {
   async getRights() {
-    const res = await apiClient.get('/api/rights');
+    const res = await apiClient.get('/api/rights', { auth: false });
     return res.data;
   },
 

@@ -140,7 +140,7 @@ const memberService = {
   },
 
   /**
-   * 게임 정보 연동 재시도
+   * 게임 정보 연동 재시도 (일반 사용자 - 자기 자신)
    * @param {string} gameName - 게임 이름
    * @returns {Promise<any>} 연동 결과
    */
@@ -150,6 +150,22 @@ const memberService = {
       return res.data;
     } catch (error) {
       console.error(`Failed to retry game sync for ${gameName}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * 게임 정보 연동 재시도 (관리자 - 특정 멤버)
+   * @param {string|number} memberId - 멤버 ID
+   * @param {string} gameName - 게임 이름
+   * @returns {Promise<any>} 연동 결과
+   */
+  async retryGameSyncForMember(memberId, gameName) {
+    try {
+      const res = await apiClient.post(`/api/members/${memberId}/retry-game-sync`, { gameName });
+      return res.data;
+    } catch (error) {
+      console.error(`Failed to retry game sync for member ${memberId}:`, error);
       throw error;
     }
   },

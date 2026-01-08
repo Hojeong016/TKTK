@@ -1,11 +1,28 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import '../styles/blacklist.css';
 import { useFetchBlacklist } from '../api/useBlacklist';
+import { canAccessRestrictedPages } from '../utils/discord-auth';
 
 export default function Blacklist() {
+  const navigate = useNavigate();
+  const hasAccess = canAccessRestrictedPages();
   const [activeTab, setActiveTab] = React.useState('blacklist');
   const { data, isLoading, isError, error } = useFetchBlacklist();
+
+  // 권한 체크 (MEMBER만 있는 사용자나 로그인 안한 사용자는 접근 불가)
+  React.useEffect(() => {
+    if (!hasAccess) {
+      alert('이 페이지에 접근할 수 있는 권한이 없습니다.');
+      navigate('/');
+    }
+  }, [hasAccess, navigate]);
+
+  // 권한이 없는 경우 렌더링하지 않음
+  if (!hasAccess) {
+    return null;
+  }
 
   const entries = Array.isArray(data) ? data : [];
   const blacklistMembers = entries.filter(entry => entry.status === 'BLACKLISTED');
