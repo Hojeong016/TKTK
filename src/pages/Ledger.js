@@ -353,7 +353,7 @@ export default function Ledger() {
         </div>
 
         {/* 요약 카드 */}
-        <div className={`ledger-summary ${isMonthlySummaryView ? 'ledger-summary-nowrap' : ''}`}>
+        <div className={`ledger-summary ${isMonthlySummaryView ? 'ledger-summary-grid' : ''}`}>
           {isMonthlySummaryView ? (
             <>
               <div className="summary-card summary-income">

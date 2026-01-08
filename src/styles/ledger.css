@@ -164,24 +164,9 @@
   margin-bottom: 40px;
 }
 
-.ledger-summary-nowrap {
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding-bottom: 6px;
-}
-
-.ledger-summary-nowrap .summary-card {
-  min-width: 240px;
-  flex: 0 0 auto;
-}
-
-.ledger-summary-nowrap .summary-card:first-child {
-  margin-left: 2px;
-}
-
-.ledger-summary-nowrap .summary-card:last-child {
-  margin-right: 2px;
+.ledger-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
 }
 
 .summary-card {
