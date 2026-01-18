@@ -11,10 +11,10 @@ export default function PerformanceTrendChart({ performanceTrends = [], period =
   const data = performanceTrends;
 
   const metrics = [
-    { id: 'kd', label: 'K/D 비율', color: '#667eea', format: (v) => v.toFixed(2) },
-    { id: 'winRate', label: '승률', color: '#10b981', format: (v) => `${v.toFixed(1)}%` },
-    { id: 'avgDamage', label: '평균 데미지', color: '#f59e0b', format: (v) => v.toFixed(1) },
-    { id: 'kills', label: '킬 수', color: '#ef4444', format: (v) => v.toFixed(0) },
+    { id: 'kd', label: 'K/D 비율', color: '#667eea', format: (v) => v != null ? v.toFixed(2) : '0.00' },
+    { id: 'winRate', label: '승률', color: '#10b981', format: (v) => v != null ? `${v.toFixed(1)}%` : '0.0%' },
+    { id: 'avgDamage', label: '평균 데미지', color: '#f59e0b', format: (v) => v != null ? v.toFixed(1) : '0.0' },
+    { id: 'kills', label: '킬 수', color: '#ef4444', format: (v) => v != null ? v.toFixed(0) : '0' },
   ];
 
   const currentMetric = metrics.find(m => m.id === selectedMetric);

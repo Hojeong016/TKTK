@@ -9,10 +9,10 @@ export default function SeasonComparison({ seasons = [], currentSeason }) {
   const [selectedMetric, setSelectedMetric] = useState('kd');
 
   const metrics = [
-    { id: 'kd', label: 'K/D', format: (v) => v.toFixed(2) },
-    { id: 'winRate', label: '승률', format: (v) => `${v.toFixed(1)}%` },
-    { id: 'avgDamage', label: '평균 데미지', format: (v) => v.toFixed(0) },
-    { id: 'totalMatches', label: '매치 수', format: (v) => v },
+    { id: 'kd', label: 'K/D', format: (v) => v != null ? v.toFixed(2) : '0.00' },
+    { id: 'winRate', label: '승률', format: (v) => v != null ? `${v.toFixed(1)}%` : '0.0%' },
+    { id: 'avgDamage', label: '평균 데미지', format: (v) => v != null ? v.toFixed(0) : '0' },
+    { id: 'totalMatches', label: '매치 수', format: (v) => v || 0 },
   ];
 
   const currentMetric = metrics.find(m => m.id === selectedMetric);
@@ -150,11 +150,11 @@ export default function SeasonComparison({ seasons = [], currentSeason }) {
               </div>
               <div className="quick-stat">
                 <span className="label">승률</span>
-                <span className="value">{season.stats.winRate.toFixed(1)}%</span>
+                <span className="value">{season.stats.winRate != null ? season.stats.winRate.toFixed(1) : '0.0'}%</span>
               </div>
               <div className="quick-stat">
                 <span className="label">K/D</span>
-                <span className="value">{season.stats.kd.toFixed(2)}</span>
+                <span className="value">{season.stats.kd != null ? season.stats.kd.toFixed(2) : '0.00'}</span>
               </div>
             </div>
           </div>
