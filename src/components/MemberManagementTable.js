@@ -2,7 +2,6 @@ import React from 'react';
 import { useFetchItems, useUpdateItem, useDeleteItem } from '../api/useFetch';
 import { getTierIcon } from '../constants/tiers';
 import useStore from '../store/useStore';
-import AddMemberModal from './AddMemberModal';
 import EditMemberModal from './EditMemberModal';
 import { extractStreamingUrl } from '../utils/streamingUrl';
 import Toast from './Toast';
@@ -10,15 +9,6 @@ import useToast from '../hooks/useToast';
 import ConfirmModal from './ConfirmModal';
 import memberService from '../api/memberService';
 import { useQueryClient } from '@tanstack/react-query';
-
-/**
- * 티어 값 정규화 (서버: "ACE" -> 프론트: "Ace")
- */
-const normalizeTier = (tier) => {
-  if (!tier) return '';
-  const tierStr = String(tier);
-  return tierStr.charAt(0).toUpperCase() + tierStr.slice(1).toLowerCase();
-};
 
 /**
  * 티어 값을 서버 형식으로 변환 (프론트: "Ace" -> 서버: "ACE")
@@ -49,7 +39,6 @@ export default function MemberManagementTable({ version }) {
   const { rightsConfig } = useStore();
   const [editModalOpen, setEditModalOpen] = React.useState(false);
   const [editingMember, setEditingMember] = React.useState(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [deleteTarget, setDeleteTarget] = React.useState(null);
   const [retryingId, setRetryingId] = React.useState(null);
   const { toast, showToast } = useToast();

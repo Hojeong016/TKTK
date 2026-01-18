@@ -17,7 +17,6 @@ export default function LedgerManagement({ version }) {
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [categories, setCategories] = useState(['회비', '후원', '펀딩', '이벤트', '식비', '기타']);
-  const [newCategory, setNewCategory] = useState('');
 
   // 폼 상태
   const [formData, setFormData] = useState({
@@ -159,15 +158,6 @@ export default function LedgerManagement({ version }) {
   const confirmDelete = () => {
     if (deleteTarget) {
       deleteMutation.mutate(deleteTarget.id);
-    }
-  };
-
-  // 새 카테고리 추가
-  const handleAddCategory = () => {
-    if (newCategory.trim() && !categories.includes(newCategory.trim())) {
-      setCategories([...categories, newCategory.trim()]);
-      setFormData({ ...formData, category: newCategory.trim() });
-      setNewCategory('');
     }
   };
 

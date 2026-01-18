@@ -1,14 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import useStore from '../store/useStore';
-import { isAdmin, isAuthenticated, getRoleFromToken, canAccessRestrictedPages } from '../utils/discord-auth';
+import { isAdmin, isAuthenticated, canAccessRestrictedPages } from '../utils/discord-auth';
 import '../styles/components.css';
 
 export default function Sidebar() {
   const showSidebar = useStore((s) => s.showSidebar);
   const userIsAdmin = isAuthenticated() && isAdmin();
-  const userRole = isAuthenticated() ? getRoleFromToken() : null;
-  const memberOnly = userRole === 'MEMBER';
   const hasRestrictedAccess = canAccessRestrictedPages();
 
   // 제한된 페이지 목록 (MEMBER 권한만 있거나 로그인 안한 사용자는 접근 불가)

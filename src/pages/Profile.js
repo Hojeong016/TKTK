@@ -42,8 +42,6 @@ export default function Profile() {
   const [modeComparison, setModeComparison] = useState({});
   const [performanceTrends, setPerformanceTrends] = useState([]);
   const [mapStats, setMapStats] = useState([]);
-  const [seasonStats, setSeasonStats] = useState([]);
-  const [currentSeason, setCurrentSeason] = useState(null);
   const [recentMatches, setRecentMatches] = useState([]);
   const [achievements] = useState([]);
   const [statsLoading, setStatsLoading] = useState(false);
@@ -208,10 +206,7 @@ export default function Profile() {
         handleError('맵 통계', mapResult.reason, false);
       }
 
-      if (seasonResult.status === 'fulfilled') {
-        setSeasonStats(seasonResult.value?.seasons || []);
-        setCurrentSeason(seasonResult.value?.currentSeason || null);
-      } else {
+      if (seasonResult.status === 'rejected') {
         handleError('시즌 통계', seasonResult.reason, false);
       }
 

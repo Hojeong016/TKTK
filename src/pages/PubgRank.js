@@ -97,7 +97,6 @@ export default function PubgRank() {
       {rankings.map((entry, index) => {
         const displayRank = entry.rank ?? index + 1;
         const key = `${entry.gameCode || entry.memberName || 'rank'}-${index}`;
-        const lastPlayed = formatLastPlayed(entry.lastPlayedAt);
         const entryAvatarUrl = getPlayerAvatarUrl(entry);
         const entryInitial = getPlayerInitial(entry);
         return (

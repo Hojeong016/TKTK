@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/components.css';
 import useStore from '../store/useStore';
-import { initiateDiscordLogin, logout, getUser, isAuthenticated, isAdmin, getRoleFromToken } from '../utils/discord-auth';
+import { initiateDiscordLogin, logout, getUser, isAuthenticated, isAdmin } from '../utils/discord-auth';
 
 export default function Header() {
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
@@ -7,24 +7,8 @@ import ledgerService from '../api/ledgerService';
 import { canAccessRestrictedPages } from '../utils/discord-auth';
 import '../styles/ledger.css';
 
-export default function Ledger() {
-  const navigate = useNavigate();
-  const hasAccess = canAccessRestrictedPages();
-
-  // 필터 상태
-  const [filterType, setFilterType] = useState('all'); // 'all', 'monthly', 'quarterly'
-  const [selectedMonth, setSelectedMonth] = useState(''); // '2025-01' 형식
-  const [selectedQuarter, setSelectedQuarter] = useState(''); // 'Q1', 'Q2', 'Q3', 'Q4'
-  const [selectedYear, setSelectedYear] = useState('2025');
-
-  // API에서 거래 내역 조회
-  const { data: allTransactions = [], isLoading, isError } = useQuery({
-    queryKey: ['ledger-transactions'],
-    queryFn: () => ledgerService.getTransactions({ auth: false })
-  });
-
-  // 샘플 데이터 (백업용 - API 연동 전까지 사용)
-  const sampleTransactions = [
+// 샘플 데이터 (백업용 - API 연동 전까지 사용)
+const sampleTransactions = [
     // 1분기 (1-3월)
     { id: 1, date: '2025-01-15', type: 'income', category: '회비', amount: 50000, description: '1월 정기 회비', memo: '10명 회비 입금 완료' },
     { id: 2, date: '2025-01-20', type: 'expense', category: '이벤트', amount: 30000, description: '신년 이벤트 상금', memo: '1등 상금 지급' },
@@ -60,14 +44,30 @@ export default function Ledger() {
     { id: 26, date: '2025-11-20', type: 'expense', category: '기타', amount: 40000, description: '서버 유지비', memo: '연간 구독' },
     { id: 27, date: '2025-12-10', type: 'income', category: '회비', amount: 50000, description: '12월 정기 회비', memo: '10명 회비 입금 완료' },
     { id: 28, date: '2025-12-25', type: 'expense', category: '이벤트', amount: 100000, description: '크리스마스 이벤트', memo: '선물 및 상금' }
-  ];
+];
+
+export default function Ledger() {
+  const navigate = useNavigate();
+  const hasAccess = canAccessRestrictedPages();
+
+  // 필터 상태
+  const [filterType, setFilterType] = useState('all'); // 'all', 'monthly', 'quarterly'
+  const [selectedMonth, setSelectedMonth] = useState(''); // '2025-01' 형식
+  const [selectedQuarter, setSelectedQuarter] = useState(''); // 'Q1', 'Q2', 'Q3', 'Q4'
+  const [selectedYear, setSelectedYear] = useState('2025');
+
+  // API에서 거래 내역 조회
+  const { data: allTransactions = [], isLoading, isError } = useQuery({
+    queryKey: ['ledger-transactions'],
+    queryFn: () => ledgerService.getTransactions({ auth: false })
+  });
 
   // 실제 사용할 거래 내역 (API 데이터가 없으면 샘플 데이터 사용)
-  const transactions = isError
-    ? sampleTransactions
-    : Array.isArray(allTransactions)
-      ? allTransactions
-      : [];
+  const transactions = useMemo(() => {
+    if (isError) return sampleTransactions;
+    if (Array.isArray(allTransactions)) return allTransactions;
+    return [];
+  }, [isError, allTransactions]);
 
   const getDateValue = (transaction) => {
     return (
@@ -442,7 +442,7 @@ export default function Ledger() {
                       dataKey="value"
                       stroke="none"
                     >
-                      {incomeChartData.map((entry, index) => (
+                      {incomeChartData.map((_, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={INCOME_COLORS[index % INCOME_COLORS.length]}
@@ -507,7 +507,7 @@ export default function Ledger() {
                       dataKey="value"
                       stroke="none"
                     >
-                      {expenseChartData.map((entry, index) => (
+                      {expenseChartData.map((_, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={EXPENSE_COLORS[index % EXPENSE_COLORS.length]}

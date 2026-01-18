@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import MatchDetailModal from './MatchDetailModal';
@@ -67,8 +67,6 @@ export default function MatchTimeline({ matches = [], limit = 5, showDetails = t
     if (Number.isNaN(numeric)) return '0';
     return numeric.toFixed(0);
   };
-
-  const [carouselIndex, setCarouselIndex] = useState(0);
 
   if (!matches || matches.length === 0) {
     return (
