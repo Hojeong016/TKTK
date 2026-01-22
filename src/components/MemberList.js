@@ -1,7 +1,7 @@
 import React from 'react';
 import MemberCard from './MemberCard';
 import TagFilter from './TagFilter';
-// import { useFetchItems } from '../api/useFetch';
+import { useFetchItems } from '../api/useFetch';
 import useStore from '../store/useStore';
 
 // 임시 더미 데이터 생성 함수
@@ -97,13 +97,7 @@ const generateMockMembers = () => {
 const MOCK_MEMBERS = generateMockMembers();
 
 export default function MemberList() {
-  // 서버 요청 주석처리 - 사무실 이전으로 인한 서버 점검
-  // const { data, isLoading, isError } = useFetchItems({ requireAuth: false });
-
-  // 임시 데이터 사용
-  const data = MOCK_MEMBERS;
-  const isLoading = false;
-  const isError = false;
+  const { data, isLoading, isError } = useFetchItems({ requireAuth: false });
 
   const setSelectedItem = useStore((s) => s.setSelectedItem);
   const selectedTags = useStore((s) => s.selectedTags);
@@ -144,32 +138,6 @@ export default function MemberList() {
 
   return (
     <section>
-      {/* 서버 점검 안내 */}
-      <div style={{
-        backgroundColor: '#fff3cd',
-        border: '1px solid #ffc107',
-        borderRadius: '8px',
-        padding: '16px 20px',
-        marginBottom: '20px',
-        color: '#856404'
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          fontSize: '15px',
-          fontWeight: '500'
-        }}>
-          <span style={{ fontSize: '20px' }}>⚠️</span>
-          <div>
-            <strong>서버 점검 안내</strong>
-            <p style={{ margin: '4px 0 0 0', fontSize: '14px', fontWeight: 'normal' }}>
-              현재 사무실 이전으로 인해 서버가 일시적으로 중단되었습니다. 빠른 시일 내에 복구하겠습니다.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="list-controls">
         <TagFilter tags={tags} />
       </div>

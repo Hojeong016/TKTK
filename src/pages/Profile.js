@@ -12,7 +12,7 @@ import PerformanceTrendChart from '../components/PerformanceTrendChart';
 import StatsComparisonBar from '../components/StatsComparisonBar';
 import MapStatsGrid from '../components/MapStatsGrid';
 import { AchievementGrid } from '../components/AchievementCard';
-import AIAnalysisBot from '../components/AIAnalysisBot';
+// import AIAnalysisBot from '../components/AIAnalysisBot';
 import gameStatsService from '../api/gameStatsService';
 import '../styles/profile.css';
 
@@ -797,7 +797,7 @@ export default function Profile() {
         )}
 
           {/* AI 분석 봇 - Profile 페이지에서 항상 표시 */}
-          <AIAnalysisBot stats={overallStats} isVisible={true} />
+          {/* <AIAnalysisBot stats={overallStats} isVisible={true} /> */}
       </motion.div>
       {showGameNameModal && (
         <div
