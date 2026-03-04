@@ -8,12 +8,13 @@ import BlacklistManagement from '../components/BlacklistManagement';
 import ClanStatusManagement from '../components/ClanStatusManagement';
 import LedgerManagement from '../components/LedgerManagement';
 import AchievementManagement from '../components/AchievementManagement';
+import SeasonManagement from '../components/SeasonManagement';
 import { isAuthenticated, isAdmin } from '../utils/discord-auth';
 import useStore from '../store/useStore';
 import '../styles/settings.css';
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = React.useState('members'); // 'members', 'clan', 'rights', 'tier', 'ledger', 'blacklist', or 'achievements'
+  const [activeTab, setActiveTab] = React.useState('members');
   const tabVersionsRef = React.useRef({
     members: 0,
     clan: 0,
@@ -21,7 +22,8 @@ export default function Settings() {
     ledger: 0,
     rights: 0,
     blacklist: 0,
-    achievements: 0
+    achievements: 0,
+    seasons: 0
   });
 
   const incrementTabVersion = (tab) => {
@@ -129,6 +131,15 @@ export default function Settings() {
           >
             업적 관리
           </button>
+          <button
+            className={`settings-tab ${activeTab === 'seasons' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('seasons');
+              incrementTabVersion('seasons');
+            }}
+          >
+            시즌 관리
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -153,6 +164,9 @@ export default function Settings() {
           )}
           {activeTab === 'achievements' && (
             <AchievementManagement key={`achievements-${tabVersionsRef.current.achievements}`} version={tabVersionsRef.current.achievements} />
+          )}
+          {activeTab === 'seasons' && (
+            <SeasonManagement key={`seasons-${tabVersionsRef.current.seasons}`} version={tabVersionsRef.current.seasons} />
           )}
         </div>
       </div>

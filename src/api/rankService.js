@@ -20,14 +20,27 @@ const buildStreamUrl = () => {
   }
 };
 
-const normalizeResponse = (payload) => {
-  if (!payload) return [];
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload.data)) return payload.data;
-  if (payload.data?.items && Array.isArray(payload.data.items)) {
-    return payload.data.items;
+const normalizeRankingsResponse = (payload) => {
+  if (!payload) return { rankings: [], currentSeason: null };
+
+  // 신규 응답 형식: { data: { currentSeason, rankings } }
+  const data = payload.data ?? payload;
+  if (data.rankings && Array.isArray(data.rankings)) {
+    return {
+      rankings: data.rankings,
+      currentSeason: data.currentSeason ?? null,
+    };
   }
-  return [];
+
+  // 구 응답 형식 호환 (배열 직접 반환)
+  if (Array.isArray(data)) {
+    return { rankings: data, currentSeason: null };
+  }
+  if (Array.isArray(payload)) {
+    return { rankings: payload, currentSeason: null };
+  }
+
+  return { rankings: [], currentSeason: null };
 };
 
 const rankService = {
@@ -40,7 +53,7 @@ const rankService = {
     const endpoint = queryString ? `/api/rank?${queryString}` : '/api/rank';
 
     const res = await apiClient.get(endpoint);
-    return normalizeResponse(res);
+    return normalizeRankingsResponse(res);
   },
   getStreamUrl: () => buildStreamUrl(),
 };

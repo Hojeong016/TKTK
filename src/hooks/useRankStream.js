@@ -8,6 +8,8 @@ const getNow = () => new Date();
 
 export default function useRankStream({ count = DEFAULT_COUNT } = {}) {
   const [rankings, setRankings] = useState([]);
+  const [currentSeason, setCurrentSeason] = useState(null);
+  const [seasonChanged, setSeasonChanged] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -27,8 +29,10 @@ export default function useRankStream({ count = DEFAULT_COUNT } = {}) {
       setError(null);
 
       try {
-        const data = await rankService.getRankings({ count });
-        setRankings(Array.isArray(data) ? data : []);
+        const { rankings: list, currentSeason: season } =
+          await rankService.getRankings({ count });
+        setRankings(Array.isArray(list) ? list : []);
+        setCurrentSeason(season);
         setLastUpdatedAt(getNow());
       } catch (err) {
         setError(err);
@@ -87,6 +91,18 @@ export default function useRankStream({ count = DEFAULT_COUNT } = {}) {
       fetchSnapshot({ silent: true });
     };
 
+    const handleSeasonChange = (event) => {
+      if (isUnmounted) return;
+      try {
+        const data = JSON.parse(event.data);
+        setSeasonChanged(data);
+      } catch (_) {
+        // ignore
+      }
+      // 시즌 전환 시 전체 새로고침
+      fetchSnapshot({ silent: false });
+    };
+
     const handleInit = () => {
       if (isUnmounted) return;
       setStreamStatus('open');
@@ -109,9 +125,9 @@ export default function useRankStream({ count = DEFAULT_COUNT } = {}) {
 
       eventSource.addEventListener('INIT', handleInit);
       eventSource.addEventListener('rank-update', handleRankUpdate);
+      eventSource.addEventListener('season-change', handleSeasonChange);
 
       eventSource.onmessage = (event) => {
-        // 일부 서버는 기본 message 타입만 사용하므로 동일하게 처리
         handleRankUpdate(event);
       };
 
@@ -134,8 +150,13 @@ export default function useRankStream({ count = DEFAULT_COUNT } = {}) {
 
   const manualRefresh = useCallback(() => fetchSnapshot(), [fetchSnapshot]);
 
+  const clearSeasonChanged = useCallback(() => setSeasonChanged(null), []);
+
   return {
     rankings,
+    currentSeason,
+    seasonChanged,
+    clearSeasonChanged,
     isLoading,
     isRefreshing,
     error,

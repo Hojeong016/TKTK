@@ -10,7 +10,7 @@ class ApiClient {
   constructor() {
     // 환경 변수에서 API URL 가져오기
     // 기본값: 로컬 개발 환경
-    this.baseURL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
+    this.baseURL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
     this.timeout = process.env.REACT_APP_API_TIMEOUT || 10000;
   }
 
